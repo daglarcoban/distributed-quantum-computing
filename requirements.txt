@@ -1,0 +1,3 @@
+quantuminspire
+qiskit
+projectq
