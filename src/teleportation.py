@@ -42,30 +42,26 @@ if __name__ == '__main__':
     c = ClassicalRegister(4)
     circuit = QuantumCircuit(q, c)
 
-    alpha = 1/sqrt(2)
-    beta = 1/sqrt(2)
+    alpha = 1#/sqrt(2)
+    beta = 0*1/sqrt(2)
     circuit.initialize([alpha, beta], q[0])
 
     circuit.h(q[1])
-    circuit.cnot(q[2],q[1])
+    circuit.cnot(q[1],q[2])
     circuit.cnot(q[0],q[1])
 
-    circuit.measure(q[1],c[1])
+    circuit.measure(q[1],c[0])
     circuit.x(1).c_if(c,1)
     circuit.x(2).c_if(c,1)
 
     circuit.h(0)
-    circuit.measure(q[0],c[0])
-    circuit.x(0).c_if(c,0)
-    circuit.z(2).c_if(c,0)
+    circuit.measure(q[0],c[1])
+    circuit.x(0).c_if(c,2)
+    circuit.z(2).c_if(c,2)
     circuit.swap(q[2],q[3])
 
-    qi_job = execute(circuit, backend=qi_backend, shots=256)
-    qi_result = qi_job.result()
-    # Print the full state counts histogram
-    histogram = qi_result.get_counts(circuit)
-    print('State\tCounts')
-    [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
+
+
     circuit.draw()
     print(circuit)
     print("\nResult from the local Qiskit simulator backend:\n")
