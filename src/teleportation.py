@@ -51,8 +51,8 @@ if __name__ == '__main__':
     circuit.cnot(q[0],q[1])
 
     circuit.measure(q[1],c[1])
-    circuit.x(1).c_if(c,2)
-    circuit.x(2).c_if(c, 2)
+    circuit.x(1).c_if(c,1)
+    circuit.x(2).c_if(c,1)
 
     circuit.h(0)
     circuit.measure(q[0],c[0])
