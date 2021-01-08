@@ -87,10 +87,11 @@ if __name__ == '__main__':
     # Mod 2 plus for 1- 4
 
     # for i in range(1, 16, 2):
-    #     circuit.x(q[5]).c_if(c, i) # 1, 3, 5, 7, 9, 11, 13, 15
+    #     circuit.x(q[5]).c_if(c, i) # 1, 3, 5, 7, 9, 11, 13, 15 # FIRST LINE
+    #
 
     for i in range(2, 16, 4):
-        circuit.x(q[5]).c_if(c, i)  # 2, 6, 10, 14
+        circuit.x(q[5]).c_if(c, i)  # 2, 6, 10, 14 # SECOND LINE
 
     for i in range(3, 16, 4):
         circuit.x(q[5]).c_if(c, i)  # 3, 7, 11, 15
@@ -108,8 +109,41 @@ if __name__ == '__main__':
     circuit.measure(q[5], c[5])
 
     for i in range(8, 16):
-         circuit.z(q[1]).c_if(c, i) # 8, 9, 10, 11, 12, 13, 14, 15
+         circuit.z(q[0]).c_if(c, i) # 8, 9, 10, 11, 12, 13, 14, 15
 
+
+    i = 4
+    j = 0
+    while i < 64:
+        if j < 4:
+            circuit.x(q[2]).c_if(c, i)
+            j += 1
+            i += 1
+        else:
+            j = 0
+            i += 4
+
+    i = 8
+    j = 0
+    while i < 64:
+        if j < 8:
+            circuit.x(q[3]).c_if(c, i)
+            j += 1
+            i += 1
+        else:
+            j = 0
+            i += 8
+
+    i = 16
+    j = 0
+    while i < 64:
+        if j < 16:
+            circuit.x(q[4]).c_if(c, i)
+            j += 1
+            i += 1
+        else:
+            j = 0
+            i += 16
 
     print(circuit.draw())
     circuit.measure(q, c)
