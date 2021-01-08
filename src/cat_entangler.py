@@ -45,16 +45,9 @@ if __name__ == '__main__':
     authentication = get_authentication()
     QI.set_authentication()
 
-    q = QuantumRegister(5)
-    c = ClassicalRegister(5)
-    circuit = QuantumCircuit(q, c)
-
-    entangler = get_cat_entangler()
-    entangler_instr = entangler.to_instruction()
-    circuit.append(entangler_instr, q)
-
+    circuit = get_cat_entangler()
+    circuit.measure(circuit.qregs[0], circuit.cregs[0])
     print(circuit.draw())
-    circuit.measure(circuit, c)
 
     print("\nResult from the remote Quantum Inspire backend:\n")
     qi_backend = QI.get_backend('QX single-node simulator')
