@@ -1,40 +1,15 @@
 import os
-from getpass import getpass
 from math import sqrt
-
-from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit import execute, BasicAer
-
 from quantuminspire.qiskit import QI
 
-QI_EMAIL = os.getenv('QI_EMAIL')
-QI_PASSWORD = os.getenv('QI_PASSWORD')
+from src.setup import get_authentication
+
 QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
 
-def get_authentication():
-    """ Gets the authentication for connecting to the Quantum Inspire API."""
-    token = load_account()
-    if token is not None:
-        return get_token_authentication(token)
-    else:
-        if QI_EMAIL is None or QI_PASSWORD is None:
-            print('Enter email:')
-            email = input()
-            print('Enter password')
-            password = getpass()
-        else:
-            email, password = QI_EMAIL, QI_PASSWORD
-        return get_basic_authentication(email, password)
-
-
-if __name__ == '__main__':
-
-    authentication = get_authentication()
-    QI.set_authentication(authentication, QI_URL)
-    qi_backend = QI.get_backend('QX single-node simulator')
-
+def get_cat_entangler():
     q = QuantumRegister(5)
     c = ClassicalRegister(5)
     circuit = QuantumCircuit(q, c)
@@ -48,8 +23,9 @@ if __name__ == '__main__':
     circuit.cx(q[1], q[2])
     circuit.cx(q[2], q[3])
     circuit.cx(q[3], q[4])
-
     circuit.barrier()
+
+    #Measure 2nd qubit
     circuit.cx(q[0], q[1])
     circuit.measure(q[1], c[1])
     circuit.barrier()
@@ -58,16 +34,30 @@ if __name__ == '__main__':
     #The value in the c_if is 2 because it will be interpreted in binary: 00010
     #Exactly what we want: we want apply the x if the 2nd bit is 1
     #The other values in the register will be 0 since they are not measured yet
-
     circuit.x(q[1]).c_if(c, 2)
     circuit.x(q[2]).c_if(c, 2)
     circuit.x(q[3]).c_if(c, 2)
     circuit.x(q[4]).c_if(c, 2)
 
+    return circuit
+
+if __name__ == '__main__':
+    authentication = get_authentication()
+    QI.set_authentication()
+
+    q = QuantumRegister(5)
+    c = ClassicalRegister(5)
+    circuit = QuantumCircuit(q, c)
+
+    entangler = get_cat_entangler()
+    entangler_instr = entangler.to_instruction()
+    circuit.append(entangler_instr, q)
+
     print(circuit.draw())
-    circuit.measure(q, c)
+    circuit.measure(circuit, c)
 
     print("\nResult from the remote Quantum Inspire backend:\n")
+    qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     # Print the full state counts histogram
@@ -86,4 +76,4 @@ if __name__ == '__main__':
     print(result.get_counts(circuit))
 
     #The result is either 00000 or 11101. This is correct, since the order of bits is reversed compared
-    #to what we are used to when we write it down: the first bit is written down at the right, the 2nd bit left to it... the 5th bit on the far left
+    #to what we are used to when we write it down
