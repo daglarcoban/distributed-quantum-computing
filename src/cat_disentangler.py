@@ -126,7 +126,7 @@ if __name__ == '__main__':
     # print('\nState\tProbabilities')
     # [print('{0}\t\t{1}'.format(state, val)) for state, val in probabilities_histogram.items()]
 
-    print("\nResult from the local Qiskit simulator backend:\n")
+    print("\nResult from the local Qiskit simulator backend:\n") # Update!
     backend = BasicAer.get_backend("qasm_simulator")
     job = execute(circuit, backend=backend, shots=1024)
     result = job.result()
