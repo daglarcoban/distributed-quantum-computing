@@ -29,20 +29,41 @@ def get_authentication():
             email, password = QI_EMAIL, QI_PASSWORD
         return get_basic_authentication(email, password)
 
-def get_disentangler(n, circuit):
-    num = n + 1
-    q = QuantumRegister(num)
-    c = []
-    for i in range
-    c0 = ClassicalRegister(1)
-    c1 = ClassicalRegister(1)
-    c2 = ClassicalRegister(1)
-    c3 = ClassicalRegister(1)
-    c4 = ClassicalRegister(1)
-    c5 = ClassicalRegister(1)
-    c = [c0, c1, c2, c3, c4, c5]
-    circuit = QuantumCircuit(q, c0, c1, c2, c3, c4, c5)
+def get_disentangler(num, circuit, q):
+    cl_reg = []
+    for i in range(num):
+        cl_reg[i] = ClassicalRegister(1)
 
+    circuit.barrier()
+
+    # H for all entangled 1-4
+    # circuit.h(q[1])
+    circuit.h(q[2])
+    circuit.h(q[3])
+    circuit.h(q[4])
+
+    # measure all 1-4
+    # circuit.measure(q[1], c[1])
+    circuit.measure(q[2], c2)
+    circuit.measure(q[3], c3)
+    circuit.measure(q[4], c4)
+
+    # Mod 2 plus for 1- 4
+
+    for i in range(3, 6):
+        circuit.x(q[5]).c_if(c[i], 1)
+
+    # Do Z if odd
+    circuit.measure(q[5], c5)
+
+    circuit.z(q[0]).c_if(c5, 1)
+
+    for i in range(2, 5):
+        circuit.x(q[i]).c_if(c[i], 1)
+
+    print(circuit.draw())
+    for i in range(5):
+        circuit.measure(q[i], c[i])
 
 if __name__ == '__main__':
     authentication = get_authentication()
