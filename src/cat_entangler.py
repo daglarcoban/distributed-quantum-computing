@@ -9,6 +9,7 @@ from src.setup import get_authentication
 
 QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
 
+#TODO: MAKE NUMBER OF QUBITS TO BE ENTANGLED VARIABLE
 def get_cat_entangler():
     q = QuantumRegister(5)
     c = ClassicalRegister(5)
