@@ -47,8 +47,8 @@ if __name__ == '__main__':
     circ=QuantumCircuit(q,c)
     
     
-    alpha = 1/np.sqrt(2)
-    beta = 1/np.sqrt(2)
+    alpha = 0
+    beta = 1
     circ.initialize([alpha, beta], q[0])
     
     circ.cx(q[0],q[3])
@@ -63,16 +63,15 @@ if __name__ == '__main__':
     circ.cx(q[3],q[5])
     circ.cx(q[6],q[8])
     
-    # RNG=np.random.random(N)
-    # for i in range(N):
-    #     if RNG[i]>=0.66:
-    #         circ.z(q[i])
-    #         continue
-    #     elif RNG[i]>=0.33 and RNG[i]<0.66:
-    #         circ.x(q[i])
-    #         continue
-    #     else:
-    #         circ.y(q[i])
+    
+    random_bit = np.random.choice([0,1,2,3,4,5,6,7,8])
+    RNG=np.random.random(1)
+    if RNG>=0.66:
+        circ.z(q[random_bit])
+    elif RNG>=0.33 and RNG<0.66:
+        circ.x(q[random_bit])
+    else:
+        circ.y(q[random_bit])
     
     
     circ.cx(q[0],q[1])
