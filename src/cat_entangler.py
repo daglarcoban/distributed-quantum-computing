@@ -64,11 +64,9 @@ if __name__ == '__main__':
     qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
-    # Print the full state counts histogram
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
     [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
-    # # Print the full state probabilities histogram
     # probabilities_histogram = qi_result.get_probabilities(circuit)
     # print('\nState\tProbabilities')
     # [print('{0}\t\t{1}'.format(state, val)) for state, val in probabilities_histogram.items()]
