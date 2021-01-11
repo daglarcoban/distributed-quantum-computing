@@ -36,8 +36,14 @@ if __name__ == '__main__':
     qi_backend = QI.get_backend('QX single-node simulator')
 
     q = QuantumRegister(6)
-    c = ClassicalRegister(6)
-    circuit = QuantumCircuit(q, c)
+    c0 = ClassicalRegister(1)
+    c1 = ClassicalRegister(1)
+    c2 = ClassicalRegister(1)
+    c3 = ClassicalRegister(1)
+    c4 = ClassicalRegister(1)
+    c5 = ClassicalRegister(1)
+    c = [c0, c1, c2, c3, c4, c5]
+    circuit = QuantumCircuit(q, c0, c1, c2, c3, c4, c5)
 
     alpha = 1 / sqrt(2)
     beta = 1 / sqrt(2)
@@ -53,7 +59,7 @@ if __name__ == '__main__':
 
     circuit.barrier()
     circuit.cx(q[0], q[1])
-    circuit.measure(q[1], c[1])
+    circuit.measure(q[1], c1)
     circuit.barrier()
 
     # Use classical measurement result of qubit 2 to control x gates
@@ -61,10 +67,10 @@ if __name__ == '__main__':
     # Exactly what we want: we want apply the x if the 2nd bit is 1
     # The other values in the register will be 0 since they are not measured yet
 
-    circuit.x(q[1]).c_if(c, 2)
-    circuit.x(q[2]).c_if(c, 2)
-    circuit.x(q[3]).c_if(c, 2)
-    circuit.x(q[4]).c_if(c, 2)
+    circuit.x(q[1]).c_if(c1, 1)
+    circuit.x(q[2]).c_if(c1, 1)
+    circuit.x(q[3]).c_if(c1, 1)
+    circuit.x(q[4]).c_if(c1, 1)
 
     print(circuit.draw())
 
@@ -80,73 +86,26 @@ if __name__ == '__main__':
 
     # measure all 1-4
     # circuit.measure(q[1], c[1])
-    circuit.measure(q[2], c[2])
-    circuit.measure(q[3], c[3])
-    circuit.measure(q[4], c[4])
+    circuit.measure(q[2], c2)
+    circuit.measure(q[3], c3)
+    circuit.measure(q[4], c4)
 
     # Mod 2 plus for 1- 4
 
-    # for i in range(1, 16, 2):
-    #     circuit.x(q[5]).c_if(c, i) # 1, 3, 5, 7, 9, 11, 13, 15 # FIRST LINE
-    #
-
-    for i in range(2, 16, 4):
-        circuit.x(q[5]).c_if(c, i)  # 2, 6, 10, 14 # SECOND LINE
-
-    for i in range(3, 16, 4):
-        circuit.x(q[5]).c_if(c, i)  # 3, 7, 11, 15
-
-    for i in range(4, 8):
-        circuit.x(q[5]).c_if(c, i) # 4, 5, 6, 7
-
-    for i in range(12, 16):
-        circuit.x(q[5]).c_if(c, i) # 12, 13, 14, 15
-
-    for i in range(8, 16):
-        circuit.x(q[5]).c_if(c, i) # 8, 9, 10, 11, 12, 13, 14, 15
+    for i in range(3, 6):
+        circuit.x(q[5]).c_if(c[i], 1)
 
     # Do Z if odd
-    circuit.measure(q[5], c[5])
+    circuit.measure(q[5], c5)
 
-    for i in range(8, 16):
-         circuit.z(q[0]).c_if(c, i) # 8, 9, 10, 11, 12, 13, 14, 15
+    circuit.z(q[0]).c_if(c5, 1)
 
-
-    i = 4
-    j = 0
-    while i < 64:
-        if j < 4:
-            circuit.x(q[2]).c_if(c, i)
-            j += 1
-            i += 1
-        else:
-            j = 0
-            i += 4
-
-    i = 8
-    j = 0
-    while i < 64:
-        if j < 8:
-            circuit.x(q[3]).c_if(c, i)
-            j += 1
-            i += 1
-        else:
-            j = 0
-            i += 8
-
-    i = 16
-    j = 0
-    while i < 64:
-        if j < 16:
-            circuit.x(q[4]).c_if(c, i)
-            j += 1
-            i += 1
-        else:
-            j = 0
-            i += 16
+    for i in range(2, 5):
+        circuit.x(q[i]).c_if(c[i], 1)
 
     print(circuit.draw())
-    circuit.measure(q, c)
+    for i in range(5):
+        circuit.measure(q[i], c[i])
 
     print("\nResult from the remote Quantum Inspire backend:\n")
     qi_job = execute(circuit, backend=qi_backend, shots=256)
