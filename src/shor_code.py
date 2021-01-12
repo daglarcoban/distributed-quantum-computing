@@ -1,40 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan  7 15:45:44 2021
-
-@author: Cynrîk
-"""
 import numpy as np
 import os
-from getpass import getpass
-from math import sqrt
-
-from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit import execute, BasicAer
 
 from quantuminspire.qiskit import QI
 
-QI_EMAIL = os.getenv('QI_EMAIL')
-QI_PASSWORD = os.getenv('QI_PASSWORD')
+from src.setup import get_authentication
+
 QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
-
-def get_authentication():
-    """ Gets the authentication for connecting to the Quantum Inspire API."""
-    token = load_account()
-    if token is not None:
-        return get_token_authentication(token)
-    else:
-        if QI_EMAIL is None or QI_PASSWORD is None:
-            print('Enter email:')
-            email = input()
-            print('Enter password')
-            password = getpass()
-        else:
-            email, password = QI_EMAIL, QI_PASSWORD
-        return get_basic_authentication(email, password)
-
 
 if __name__ == '__main__':
 
@@ -45,8 +19,7 @@ if __name__ == '__main__':
     c=ClassicalRegister(N)
     q=QuantumRegister(N)
     circ=QuantumCircuit(q,c)
-    
-    
+
     alpha = 0
     beta = 1
     circ.initialize([alpha, beta], q[0])
@@ -62,8 +35,7 @@ if __name__ == '__main__':
     circ.cx(q[0],q[2])
     circ.cx(q[3],q[5])
     circ.cx(q[6],q[8])
-    
-    
+
     random_bit = np.random.choice([0,1,2,3,4,5,6,7,8])
     RNG=np.random.random(1)
     if RNG>=0.66:
@@ -72,8 +44,7 @@ if __name__ == '__main__':
         circ.x(q[random_bit])
     else:
         circ.y(q[random_bit])
-    
-    
+
     circ.cx(q[0],q[1])
     circ.cx(q[3],q[4])
     circ.cx(q[6],q[7])
@@ -90,16 +61,11 @@ if __name__ == '__main__':
     circ.cx(q[0],q[6])
     circ.ccx(q[3],q[6],q[0])
     circ.measure(q,c)
+
+    print(circ.draw())
+
     qi_job = execute(circ, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
-    # Print the full state counts histogram
     histogram = qi_result.get_counts(circ)
     print('State\tCounts')
     [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
-    circ.draw()
-    print(circ)
-    print("\nResult from the local Qiskit simulator backend:\n")
-    backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circ, backend=backend, shots=1024)
-    result = job.result()
-    print(result.get_counts(circ))

@@ -1,8 +1,10 @@
 import os
+from math import sqrt
 
-from qiskit import execute, circuit, BasicAer, QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit import execute, BasicAer, QuantumRegister, ClassicalRegister, QuantumCircuit
 from quantuminspire.qiskit import QI
 
+from src.cat_disentangler import get_cat_disentangler
 from src.cat_entangler import get_cat_entangler
 from src.setup import get_authentication
 
@@ -12,31 +14,36 @@ if __name__ == '__main__':
     authentication = get_authentication()
     QI.set_authentication(authentication, QI_URL)
 
-    q = QuantumRegister(2)
-    c = ClassicalRegister(2)
-    circuit = QuantumCircuit(q, c)
-    circuit.cx()
+    q = QuantumRegister(4)
+    circuit = QuantumCircuit(q)
+    c = [ClassicalRegister(1), ClassicalRegister(1), ClassicalRegister(1), ClassicalRegister(1)]
+    for reg in c:
+        circuit.add_register(reg)
 
-    get_cat_entangler(2) + circuit + get_cat_disentangler(2)
+    alpha = sqrt(50)/sqrt(100)
+    beta = sqrt(50)/sqrt(100)
+    circuit.initialize([alpha, beta], q[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [0, 1, 2])
+    circuit.cx(q[2], q[3])
+    circuit = circuit.compose(get_cat_disentangler(2), [0, 1, 2])
+    for i in range(4):
+        circuit.measure(circuit.qregs[0][i], circuit.cregs[i])
+    print(circuit.draw())
 
     print("\nResult from the remote Quantum Inspire backend:\n")
     qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
-    # Print the full state counts histogram
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
     [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
-    # # Print the full state probabilities histogram
     # probabilities_histogram = qi_result.get_probabilities(circuit)
     # print('\nState\tProbabilities')
     # [print('{0}\t\t{1}'.format(state, val)) for state, val in probabilities_histogram.items()]
 
-    print("\nResult from the local Qiskit simulator backend:\n")
-    backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circuit, backend=backend, shots=1024)
-    result = job.result()
-    print(result.get_counts(circuit))
-
-    #Note the bits in the result are reversed to what we are used to, so:
-    # the first bit is written down at the right, the 2nd bit left to it... the 5th bit on the far left
+    # print("\nResult from the local Qiskit simulator backend:\n")
+    # backend = BasicAer.get_backend("qasm_simulator")
+    # job = execute(circuit, backend=backend, shots=1024)
+    # result = job.result()
+    # print(result.get_counts(circuit))
