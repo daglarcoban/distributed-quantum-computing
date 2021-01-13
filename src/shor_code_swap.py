@@ -18,6 +18,9 @@ if __name__ == '__main__':
     q=QuantumRegister(N)
     circ=QuantumCircuit(q,c)
 
+    alpha = 1
+    beta = 0#sqrt(50) / sqrt(100)
+    circ.initialize([alpha, beta], q[0])
 
     #cnot section 1
     circ.swap(q[0],q[1])
@@ -161,8 +164,13 @@ if __name__ == '__main__':
     circ.swap(q[4], q[5])
     circ.swap(q[3], q[4])
 
+    #measure
+    circ.measure_all()
+
+    print(circ.draw())
+
     #test results
-    qi_job = execute(circ, backend=qi_backend, shots=10)
+    qi_job = execute(circ, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circ)
     print('State\tCounts')
