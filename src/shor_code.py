@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 
 from quantuminspire.qiskit import QI
 

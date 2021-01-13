@@ -36,7 +36,7 @@ def get_cat_entangler(number_of_entangled_qubits):
 
     return circuit
 
-#Test cat entangler
+#Test cat-entangler
 if __name__ == '__main__':
     authentication = get_authentication()
     QI.set_authentication()

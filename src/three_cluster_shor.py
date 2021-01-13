@@ -2,39 +2,17 @@ from math import sqrt
 
 import numpy as np
 import os
-from getpass import getpass
-
-from qiskit.visualization import circuit_drawer
-from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 
 from quantuminspire.qiskit import QI
 
 from src.cat_disentangler import get_cat_disentangler
 from src.cat_entangler import get_cat_entangler
+from src.setup import get_authentication
 
-QI_EMAIL = os.getenv('QI_EMAIL')
-QI_PASSWORD = os.getenv('QI_PASSWORD')
 QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
-
-
-def get_authentication():
-    """ Gets the authentication for connecting to the Quantum Inspire API."""
-    token = load_account()
-    if token is not None:
-        return get_token_authentication(token)
-    else:
-        if QI_EMAIL is None or QI_PASSWORD is None:
-            print('Enter email:')
-            email = input()
-            print('Enter password')
-            password = getpass()
-        else:
-            email, password = QI_EMAIL, QI_PASSWORD
-        return get_basic_authentication(email, password)
-
 
 def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
     circuit_in.h(q_reg[q_in])
@@ -54,7 +32,6 @@ def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q
     circuit_in.cx(q_reg[control_1], q_reg[control_2])
 
     return circuit_in
-
 
 if __name__ == '__main__':
     authentication = get_authentication()
@@ -199,6 +176,7 @@ if __name__ == '__main__':
     circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]], [c_b[0][0], c_b[3][0], c_c[3][0]])
     ## NON LOCAL TOFFOLI GATES --- END
 
+    # circuit.draw(output="mpl", filename="../circuit.png")
     # circuit.draw(output="mpl", filename="../circuit.jpeg")
 
     print(circuit.draw())
