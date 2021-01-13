@@ -1,3 +1,5 @@
+from math import sqrt
+
 import numpy as np
 import os
 from getpass import getpass
@@ -77,8 +79,8 @@ if __name__ == '__main__':
     for reg in c_c:
         circuit_c.add_register(reg)
 
-    alpha = 0
-    beta = 1
+    alpha = 1 / sqrt(2)
+    beta = 1 / sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c
@@ -205,8 +207,22 @@ if __name__ == '__main__':
         for j in range(4):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[4*i + j])
 
-    qi_job = execute(circuit, backend=qi_backend, shots=256)
+    qi_job = execute(circuit, backend=qi_backend, shots=10)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
     [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
+
+    for state, counts in histogram.items():
+        # results_all = list(list(state))[0]
+        # print(results_all)
+        # results_all = results_all[::2]
+        results = []
+        for i in range(len(state)):
+            if i % 4 == 0:
+                continue
+            else:
+                results.append(state[i])
+        results = " ".join(results)
+        print(results)
+        print(counts)
