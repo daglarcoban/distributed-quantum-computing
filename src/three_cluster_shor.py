@@ -207,22 +207,21 @@ if __name__ == '__main__':
         for j in range(4):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[4*i + j])
 
-    qi_job = execute(circuit, backend=qi_backend, shots=10)
+    qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
-    [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
 
     for state, counts in histogram.items():
-        # results_all = list(list(state))[0]
-        # print(results_all)
-        # results_all = results_all[::2]
+        results_all = list(list(state))
+        results_all = results_all[::2]
+        results_all = "".join(results_all)
         results = []
-        for i in range(len(state)):
+        for i in range(len(results_all)):
             if i % 4 == 0:
                 continue
             else:
-                results.append(state[i])
-        results = " ".join(results)
+                results.append(results_all[i])
+        results = "".join(results)
+        results = results + " " + str(counts)
         print(results)
-        print(counts)
