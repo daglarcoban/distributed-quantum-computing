@@ -159,42 +159,42 @@ if __name__ == '__main__':
     ### NON LOCAL TOFFOLI GATES --- START
     circuit.h(q_a[0])
 
-    # circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[3], q_a[3]])
-    # circuit.cx(q_a[3], q_a[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[3], q_a[3]])
-    #
-    # circuit.tdg(q_a[0])
-    #
-    # circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_a[3]])
-    # circuit.cx(q_a[3], q_a[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_a[3]])
-    #
-    # circuit.t(q_a[0])
-    #
-    # circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[3], q_a[3]])
-    # circuit.cx(q_a[3], q_a[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[3], q_a[3]])
-    #
-    # circuit.tdg(q_a[0])
-    #
-    # circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_a[3]])
-    # circuit.cx(q_a[3], q_a[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_a[3]])
-    #
-    # circuit.t(q_c[0])
-    # circuit.t(q_a[0])
-    #
-    # circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_c[3]])
-    # circuit.cx(q_c[3], q_c[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]])
-    #
-    # circuit.h(q_a[0])
-    # circuit.t(q_b[0])
-    # circuit.tdg(q_c[0])
-    #
-    # circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_c[3]])
-    # circuit.cx(q_c[3], q_c[0])
-    # circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]])
+    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[3], q_a[3]], [q_c[0][0], q_c[3][0], q_a[3][0]])
+    circuit.cx(q_a[3], q_a[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[3], q_a[3]], [q_c[0][0], q_c[3][0], q_a[3][0]])
+
+    circuit.tdg(q_a[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_a[3]], [q_b[0][0], q_b[3][0], q_a[3][0]])
+    circuit.cx(q_a[3], q_a[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_a[3]], [q_b[0][0], q_b[3][0], q_a[3][0]])
+
+    circuit.t(q_a[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[3], q_a[3]], [q_c[0][0], q_c[3][0], q_a[3][0]])
+    circuit.cx(q_a[3], q_a[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[3], q_a[3]], [q_c[0][0], q_c[3][0], q_a[3][0]])
+
+    circuit.tdg(q_a[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_a[3]], [q_b[0][0], q_b[3][0], q_a[3][0]])
+    circuit.cx(q_a[3], q_a[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_a[3]], [q_b[0][0], q_b[3][0], q_a[3][0]])
+
+    circuit.t(q_c[0])
+    circuit.t(q_a[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_c[3]], [q_b[0][0], q_b[3][0], q_c[3][0]])
+    circuit.cx(q_c[3], q_c[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]], [q_b[0][0], q_b[3][0], q_c[3][0]])
+
+    circuit.h(q_a[0])
+    circuit.t(q_b[0])
+    circuit.tdg(q_c[0])
+
+    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[3], q_c[3]], [q_b[0][0], q_b[3][0], q_c[3][0]])
+    circuit.cx(q_c[3], q_c[0])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]], [q_b[0][0], q_b[3][0], q_c[3][0]])
     ## NON LOCAL TOFFOLI GATES --- END
 
     # circuit.draw(output="mpl", filename="../circuit.jpeg")
