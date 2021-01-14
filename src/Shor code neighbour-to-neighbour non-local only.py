@@ -96,8 +96,8 @@ if __name__ == '__main__':
         circ.add_register(reg)
     
     
-    alpha = 0
-    beta = 1
+    alpha = 1/np.sqrt(2)
+    beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
     
     #CNOT from 1-4
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     circ.cx(q[14],q[13])
     circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[14]], [c[10][0], c[11][0], c[14][0]])
     
-    #
+    
     circ.h(q[0])
     circ.h(q[5])
     circ.h(q[10])
@@ -184,6 +184,30 @@ if __name__ == '__main__':
     circ.cx(q[11],q[10])
     circ = circ.compose(get_cat_disentangler(2), [q[13], q[14], q[11]], [c[13][0], c[14][0], c[11][0]])
     
+    circ.t(q[0])
+    circ.t(q[5])
+    circ.t(q[10])
+    
+    circ.cx(q[2],q[0])
+    circ.cx(q[7],q[5])
+    circ.cx(q[12],q[10])
+    
+    circ.tdg(q[0])
+    circ.tdg(q[5])
+    circ.tdg(q[10])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[3], q[4], q[1]], [c[3][0], c[4][0], c[1][0]])
+    circ.cx(q[1],q[0])
+    circ = circ.compose(get_cat_disentangler(2), [q[3], q[4], q[1]], [c[3][0], c[4][0], c[1][0]])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[6]], [c[8][0], c[9][0], c[6][0]])
+    circ.cx(q[6],q[5])
+    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[6]], [c[8][0], c[9][0], c[6][0]])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[13], q[14], q[11]], [c[13][0], c[14][0], c[11][0]])
+    circ.cx(q[11],q[10])
+    circ = circ.compose(get_cat_disentangler(2), [q[13], q[14], q[11]], [c[13][0], c[14][0], c[11][0]])
+        
     circ.t(q[0])
     circ.t(q[2])
     circ.t(q[5])
@@ -221,10 +245,10 @@ if __name__ == '__main__':
     
     #
     circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
-    circ.cx(q[11],q[0])
+    circ.cx(q[11],q[10])
     circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
     
-    #
+    #Final Toffoli gate
     circ.h(q[0])
     
     circ=circ.compose(get_cat_entangler(2), [q[5], q[6], q[1]], [c[5][0], c[6][0], c[1][0]])
