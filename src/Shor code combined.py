@@ -89,145 +89,206 @@ if __name__ == '__main__':
         return circuit
     
     #c=ClassicalRegister(15)
-    q=QuantumRegister(15)
+    q=QuantumRegister(12)
     circ=QuantumCircuit(q)
-    c = [ClassicalRegister(1) for _ in range(15)]
+    c = [ClassicalRegister(1) for _ in range(12)]
     for reg in c:
         circ.add_register(reg)
     
     
-    alpha = 0#1/np.sqrt(2)
-    beta = 1#1/np.sqrt(2)
+    alpha = 1/np.sqrt(2)
+    beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
     
     #CNOT from 1-4
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
-    circ.cx(q[6],q[5])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
+    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ.cx(q[5],q[4])
+    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     
     #CNOT from 1-7
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
-    circ.cx(q[11],q[10])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
+    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ.cx(q[9],q[8])
+    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     
     #hadamard gate section 1
     circ.h(q[0])
-    circ.h(q[5])
-    circ.h(q[10])
+    circ.h(q[4])
+    circ.h(q[8])
     circ.barrier()
 
-    #cnot-small section 1
-    for i in (0,5,10):
-        circ.cnot(q[0+i],q[2+i])
-        circ.swap(q[0+i],q[2+i])
-        circ.cnot(q[2 + i], q[3 + i])
-        circ.swap(q[0 + i], q[2 + i])
+    circ.cx(q[0],q[2])
+    circ.cx(q[4],q[6])
+    circ.cx(q[8],q[10])
+    
+    circ.swap(q[0],q[2])
+    circ.swap(q[4],q[6])
+    circ.swap(q[8],q[10])
+    
+    circ.cx(q[2],q[3])
+    circ.cx(q[6],q[7])
+    circ.cx(q[10],q[11])
+    
+    circ.swap(q[0],q[2])
+    circ.swap(q[4],q[6])
+    circ.swap(q[8],q[10])
+    
+    #shor block section
+    random_bit = np.random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    RNG = np.random.random(1)
+    if RNG >= 0.66:
+        circ.z(q[random_bit])
+    elif RNG >= 0.33 and RNG < 0.66:
+        circ.x(q[random_bit])
+    else:
+        circ.y(q[random_bit])
     circ.barrier()
     
-    # # #shor block section
-    # # random_bit = np.random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    # # RNG = np.random.random(1)
-    # # if RNG >= 0.66:
-    # #     circ.z(q[random_bit])
-    # # elif RNG >= 0.33 and RNG < 0.66:
-    # #     circ.x(q[random_bit])
-    # # else:
-    # #     circ.y(q[random_bit])
-    # # circ.barrier()
+    circ.cx(q[0],q[2])
+    circ.cx(q[4],q[6])
+    circ.cx(q[8],q[10])
     
-    # #cnot-small section 2
-    # for i in (0,5,10):
-    #     circ.cnot(q[0+i],q[2+i])
-    #     circ.swap(q[0+i],q[2+i])
-    #     circ.cnot(q[2 + i], q[3 + i])
-    #     circ.swap(q[0 + i], q[2 + i])
+    circ.swap(q[0],q[2])
+    circ.swap(q[4],q[6])
+    circ.swap(q[8],q[10])
+    
+    circ.cx(q[2],q[3])
+    circ.cx(q[6],q[7])
+    circ.cx(q[10],q[11])
+    
+    circ.swap(q[0],q[2])
+    circ.swap(q[4],q[6])
+    circ.swap(q[8],q[10])
+    
+    #hadamard gate section 2
+    circ.h(q[0])
+    circ.h(q[4])
+    circ.h(q[8])
+    circ.barrier()
+
+    circ.cx(q[2],q[0])
+    circ.cx(q[6],q[4])
+    circ.cx(q[10],q[8])
+    
+    circ.tdg(q[0])
+    circ.tdg(q[4])
+    circ.tdg(q[8])
+    
+    circ.swap(q[2],q[0])
+    circ.swap(q[6],q[4])
+    circ.swap(q[10],q[8])
+
+    circ.cx(q[3],q[2])
+    circ.cx(q[7],q[6])
+    circ.cx(q[11],q[10])
+    
+    circ.swap(q[2],q[0])
+    circ.swap(q[6],q[4])
+    circ.swap(q[10],q[8])
+    
+    circ.t(q[0])
+    circ.t(q[4])
+    circ.t(q[8])
+    
+    circ.cx(q[2],q[0])
+    circ.cx(q[6],q[4])
+    circ.cx(q[10],q[8])
+    
+    circ.tdg(q[0])
+    circ.tdg(q[4])
+    circ.tdg(q[8])
+    
+    circ.swap(q[2],q[0])
+    circ.swap(q[6],q[4])
+    circ.swap(q[10],q[8])
+    
+    circ.cx(q[3],q[2])
+    circ.cx(q[7],q[6])
+    circ.cx(q[11],q[10])
+    
+    circ.swap(q[2],q[0])
+    circ.swap(q[6],q[4])
+    circ.swap(q[10],q[8])
+    
+    circ.t(q[0])
+    circ.t(q[2])
+    circ.t(q[4])
+    circ.t(q[6])
+    circ.t(q[8])
+    circ.t(q[10])
+    
+    circ.cx(q[3],q[2])
+    circ.cx(q[7],q[6])
+    circ.cx(q[11],q[10])
+    
+    circ.tdg(q[2])
+    circ.t(q[3])
+    circ.tdg(q[6])
+    circ.t(q[7])
+    circ.tdg(q[10])
+    circ.t(q[11])
+    
+    circ.cx(q[3],q[2])
+    circ.cx(q[7],q[6])
+    circ.cx(q[11],q[10])
+    
     # circ.barrier()
     
-    # #hadamard gate section 2
-    # circ.h(q[0])
-    # circ.h(q[5])
-    # circ.h(q[10])
-    # circ.barrier()
-
-    # #tof gate section 1
-    # for i in (0,5,10):
-    #     circ.cnot(q[2+i],q[0+i])
-    #     circ.tdg(q[0+i])
-    #     circ.swap(q[0+i],q[2+i])
-    #     circ.cnot(q[3+i],q[2+i])
-    #     circ.swap(q[0+i], q[2+i])
-    #     circ.t(q[0+i])
-    #     circ.cnot(q[2+i],q[0+i])
-    #     circ.tdg(q[0 + i])
-    #     circ.swap(q[0+i],q[2+i])
-    #     circ.cnot(q[3+i],q[2+i])
-    #     circ.swap(q[0+i],q[2+i])
-    #     circ.t(q[0+i])
-    #     circ.t(q[2+i])
-    #     circ.h(q[0+i])
-    #     circ.cnot(q[3+i],q[2+i])
-    #     circ.tdg(q[2+i])
-    #     circ.t(q[3+i])
-    #     circ.cnot(q[3 + i], q[2 + i])
-
-
-    # circ.barrier()
+    
+    #
+    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ.cx(q[5],q[4])
+    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    
+    #
+    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ.cx(q[9],q[8])
+    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    
+    #Final Toffoli gate
+    circ.h(q[0])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ.cx(q[1],q[0])
+    circ = circ.compose(get_cat_disentangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    
+    circ.tdg(q[0])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ.cx(q[1],q[0])
+    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    
+    circ.t(q[0])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ.cx(q[1],q[0])
+    circ = circ.compose(get_cat_disentangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    
+    circ.tdg(q[0])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ.cx(q[1],q[0])
+    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    
+    circ.t(q[0])
+    circ.t(q[4])
+    
+    circ.h(q[0])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ.cx(q[5],q[4])
+    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    
+    circ.tdg(q[4])
+    circ.t(q[8])
+    
+    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ.cx(q[5],q[4])
+    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
     
     
-    # #
-    # circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
-    # circ.cx(q[6],q[5])
-    # circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
-    
-    # #
-    # circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
-    # circ.cx(q[11],q[10])
-    # circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
-    
-    # #Final Toffoli gate
-    # circ.h(q[0])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[5], q[6], q[1]], [c[5][0], c[6][0], c[1][0]])
-    # circ.cx(q[1],q[0])
-    # circ = circ.compose(get_cat_disentangler(2), [q[5], q[6], q[1]], [c[5][0], c[6][0], c[1][0]])
-    
-    # circ.tdg(q[0])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[10], q[11], q[1]], [c[10][0], c[11][0], c[1][0]])
-    # circ.cx(q[1],q[0])
-    # circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[1]], [c[10][0], c[11][0], c[1][0]])
-    
-    # circ.t(q[0])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[5], q[6], q[1]], [c[5][0], c[6][0], c[1][0]])
-    # circ.cx(q[1],q[0])
-    # circ = circ.compose(get_cat_disentangler(2), [q[5], q[6], q[1]], [c[5][0], c[6][0], c[1][0]])
-    
-    # circ.tdg(q[0])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[10], q[11], q[1]], [c[10][0], c[11][0], c[1][0]])
-    # circ.cx(q[1],q[0])
-    # circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[1]], [c[10][0], c[11][0], c[1][0]])
-    
-    # circ.t(q[0])
-    # circ.t(q[5])
-    
-    # circ.h(q[0])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[10], q[11], q[6]], [c[10][0], c[11][0], c[6][0]])
-    # circ.cx(q[6],q[5])
-    # circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[6]], [c[10][0], c[11][0], c[6][0]])
-    
-    # circ.tdg(q[5])
-    # circ.t(q[10])
-    
-    # circ=circ.compose(get_cat_entangler(2), [q[10], q[11], q[6]], [c[10][0], c[11][0], c[6][0]])
-    # circ.cx(q[6],q[5])
-    # circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[6]], [c[10][0], c[11][0], c[6][0]])
-    
-    
-    for i in range(15):
+    for i in range(12):
         circ.measure(circ.qregs[0][i], circ.cregs[i])
+        
     
     qi_job = execute(circ, backend=qi_backend, shots=20)
     qi_result = qi_job.result()
