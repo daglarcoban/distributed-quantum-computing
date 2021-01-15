@@ -18,8 +18,8 @@ if __name__ == '__main__':
     q=QuantumRegister(N)
     circ=QuantumCircuit(q,c)
 
-    alpha = 1
-    beta = 0#sqrt(50) / sqrt(100)
+    alpha = 0
+    beta = 1#sqrt(50) / sqrt(100)
     circ.initialize([alpha, beta], q[0])
 
     #cnot section 1

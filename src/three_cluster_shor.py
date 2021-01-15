@@ -36,24 +36,24 @@ def get_authentication():
         return get_basic_authentication(email, password)
 
 
-def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
-    circuit_in.h(q_reg[q_in])
-    circuit_in.cx(q_reg[control_2], q_reg[q_in])
-    circuit_in.tdg(q_reg[q_in])
-    circuit_in.cx(q_reg[control_1], q_reg[q_in])
-    circuit_in.t(q_reg[q_in])
-    circuit_in.cx(q_reg[control_2], q_reg[q_in])
-    circuit_in.tdg(q_reg[q_in])
-    circuit_in.cx(q_reg[control_1], q_reg[q_in])
-    circuit_in.t(q_reg[control_2])
-    circuit_in.t(q_reg[q_in])
-    circuit_in.cx(q_reg[control_1], q_reg[control_2])
-    circuit_in.h(q_reg[q_in])
-    circuit_in.t(q_reg[control_1])
-    circuit_in.tdg(q_reg[control_2])
-    circuit_in.cx(q_reg[control_1], q_reg[control_2])
-
-    return circuit_in
+# def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
+#     circuit_in.h(q_reg[q_in])
+#     circuit_in.cx(q_reg[control_2], q_reg[q_in])
+#     circuit_in.tdg(q_reg[q_in])
+#     circuit_in.cx(q_reg[control_1], q_reg[q_in])
+#     circuit_in.t(q_reg[q_in])
+#     circuit_in.cx(q_reg[control_2], q_reg[q_in])
+#     circuit_in.tdg(q_reg[q_in])
+#     circuit_in.cx(q_reg[control_1], q_reg[q_in])
+#     circuit_in.t(q_reg[control_2])
+#     circuit_in.t(q_reg[q_in])
+#     circuit_in.cx(q_reg[control_1], q_reg[control_2])
+#     circuit_in.h(q_reg[q_in])
+#     circuit_in.t(q_reg[control_1])
+#     circuit_in.tdg(q_reg[control_2])
+#     circuit_in.cx(q_reg[control_1], q_reg[control_2])
+#
+#     return circuit_in
 
 
 if __name__ == '__main__':
@@ -79,8 +79,8 @@ if __name__ == '__main__':
     for reg in c_c:
         circuit_c.add_register(reg)
 
-    alpha = 1 / sqrt(2)
-    beta = 1 / sqrt(2)
+    alpha =  0# / sqrt(2)
+    beta = 1 #/ sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c
@@ -134,9 +134,12 @@ if __name__ == '__main__':
     circuit.cx(q_c[0], q_c[1])
     circuit.cx(q_c[0], q_c[2])
 
-    circuit + toffoli(circuit, 1, 2, 0, q_a)
-    circuit + toffoli(circuit, 1, 2, 0, q_b)
-    circuit + toffoli(circuit, 1, 2, 0, q_c)
+    # circuit + toffoli(circuit, 1, 2, 0, q_a)
+    # circuit + toffoli(circuit, 1, 2, 0, q_b)
+    # circuit + toffoli(circuit, 1, 2, 0, q_c)
+    circuit.ccx(q_a[1],q_a[2],q_a[0])
+    circuit.ccx(q_b[1], q_b[2], q_b[0])
+    circuit.ccx(q_c[1], q_c[2], q_c[0])
 
     circuit.barrier()  # until h gates
 
