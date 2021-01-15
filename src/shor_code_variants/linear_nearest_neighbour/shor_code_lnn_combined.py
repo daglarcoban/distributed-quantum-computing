@@ -1,101 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 14 11:52:11 2021
-
-@author: Cynrîk
-"""
-import os
 import numpy as np
-from getpass import getpass
-from math import sqrt
-from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 from quantuminspire.qiskit import QI
-
-QI_EMAIL = os.getenv('QI_EMAIL')
-QI_PASSWORD = os.getenv('QI_PASSWORD')
-QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
-
-def get_authentication():
-    """ Gets the authentication for connecting to the Quantum Inspire API."""
-    token = load_account()
-    if token is not None:
-        return get_token_authentication(token)
-    else:
-        if QI_EMAIL is None or QI_PASSWORD is None:
-            print('Enter email:')
-            email = input()
-            print('Enter password')
-            password = getpass()
-        else:
-            email, password = QI_EMAIL, QI_PASSWORD
-        return get_basic_authentication(email, password)
+from src.util.authentication import QI_authenticate
+from src.util.cat_disentangler import get_cat_disentangler
+from src.util.cat_entangler import get_cat_entangler
 
 if __name__ == '__main__':
-
-    authentication = get_authentication()
-    QI.set_authentication(authentication, QI_URL)
-    qi_backend = QI.get_backend('QX single-node simulator')
-
-    def get_cat_entangler(number_of_entangled_qubits):
-        q = QuantumRegister(number_of_entangled_qubits + 1)
-        circuit = QuantumCircuit(q)
-        c = [ClassicalRegister(1) for _ in range(number_of_entangled_qubits + 1)]
-        for reg in c:
-            circuit.add_register(reg)
-    
-        #Entangle last number_of_entangled_qubits qubits
-        circuit.h(q[1])
-        for i in range(1, number_of_entangled_qubits):
-            circuit.cx(q[i], q[i+1])
-        circuit.barrier()
-    
-        circuit.cx(q[0], q[1])
-        circuit.barrier()
-    
-        #Measure 2nd qubit
-        circuit.measure(q[1], c[1])
-        circuit.barrier()
-    
-        #Apply X gate on last number_of_entangled_qubits qubits
-        # depending on measurement result of qubit 2
-        for i in range(1, number_of_entangled_qubits + 1):
-            circuit.x(q[i]).c_if(c[1], 1)
-    
-        return circuit
-    
-    def get_cat_disentangler(number_of_entangled_qubits):
-        q = QuantumRegister(number_of_entangled_qubits + 1)
-        circuit = QuantumCircuit(q)
-        c = [ClassicalRegister(1) for _ in range(number_of_entangled_qubits + 1)]
-        for reg in c:
-            circuit.add_register(reg)
-    
-        # Apply Hadamard gate on each of the last number_of_entangled_qubits - 1 qubits
-        for i in range(2, number_of_entangled_qubits + 1):
-            circuit.h(q[i])
-    
-        # Measure each of the last number_of_entangled_qubits - 1 qubits
-        # Apply X gate on each depending on corresponding measurement outcome
-        for i in range(2, number_of_entangled_qubits + 1):
-            circuit.measure(q[i], c[i])
-            circuit.x(q[i]).c_if(c[i], 1)
-    
-        # Apply Z gate on first qubit depending on XOR of all measurement outcomes
-        for i in range(2, number_of_entangled_qubits + 1):
-            circuit.z(q[0]).c_if(c[i], 1)
-    
-        return circuit
-    
-    #c=ClassicalRegister(15)
     q=QuantumRegister(12)
     circ=QuantumCircuit(q)
     c = [ClassicalRegister(1) for _ in range(12)]
     for reg in c:
         circ.add_register(reg)
-    
-    
+
     alpha = 1/np.sqrt(2)
     beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
@@ -284,61 +201,19 @@ if __name__ == '__main__':
     circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
     circ.cx(q[5],q[4])
     circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
-    
-    
+
+    print(circ.draw())
+    print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
+
+    #measure all so we can see results
     for i in range(12):
         circ.measure(circ.qregs[0][i], circ.cregs[i])
-        
-    
-    qi_job = execute(circ, backend=qi_backend, shots=20)
+
+    # print results
+    QI_authenticate()
+    qi_backend = QI.get_backend('QX single-node simulator')
+    qi_job = execute(circ, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
-    # Print the full state counts histogram
     histogram = qi_result.get_counts(circ)
     print('State\tCounts')
     [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
-    circ.draw()
-    print("\nResult from the local Qiskit simulator backend:\n")
-    backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circ, backend=backend, shots=11)
-    result = job.result()
-    print(result.get_counts(circ))
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

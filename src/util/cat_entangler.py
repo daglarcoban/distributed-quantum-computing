@@ -1,13 +1,10 @@
-import os
 from math import sqrt
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 from quantuminspire.qiskit import QI
 
-from src.setup import get_authentication
-
-QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
+from src.util.authentication import QI_authenticate
 
 def get_cat_entangler(number_of_entangled_qubits):
     q = QuantumRegister(number_of_entangled_qubits + 1)
@@ -36,11 +33,8 @@ def get_cat_entangler(number_of_entangled_qubits):
 
     return circuit
 
-#Test cat entangler
+#Test cat-entangler
 if __name__ == '__main__':
-    authentication = get_authentication()
-    QI.set_authentication()
-
     number_of_entangled_qubits = 4
     q = QuantumRegister(number_of_entangled_qubits + 1)
     circuit = QuantumCircuit(q)
@@ -53,6 +47,7 @@ if __name__ == '__main__':
     circuit.initialize([alpha, beta], q[0])
 
     circuit = circuit.compose(get_cat_entangler(number_of_entangled_qubits), range(number_of_entangled_qubits + 1))
+
     for i in range(number_of_entangled_qubits + 1):
         circuit.measure(circuit.qregs[0][i], circuit.cregs[i])
     print(circuit.draw())
@@ -61,6 +56,7 @@ if __name__ == '__main__':
     # This is correct, since the order of the bits is reversed compared to what we are used to when we write it down
 
     print("\nResult from the remote Quantum Inspire backend:\n")
+    QI_authenticate()
     qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()

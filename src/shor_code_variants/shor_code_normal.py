@@ -1,27 +1,19 @@
 import numpy as np
-import os
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 
 from quantuminspire.qiskit import QI
 
-from src.setup import get_authentication
-
-QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
+from src.util.authentication import QI_authenticate
 
 if __name__ == '__main__':
-
-    authentication = get_authentication()
-    QI.set_authentication(authentication, QI_URL)
-    qi_backend = QI.get_backend('QX single-node simulator')
-    N=9
-    c=ClassicalRegister(N)
-    q=QuantumRegister(N)
+    c=ClassicalRegister(9)
+    q=QuantumRegister(9)
     circ=QuantumCircuit(q,c)
 
-    alpha = 0
-    beta = 1
+    alpha = 1/np.sqrt(2)
+    beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
     
     circ.cx(q[0],q[3])
@@ -60,10 +52,16 @@ if __name__ == '__main__':
     circ.cx(q[0],q[3])
     circ.cx(q[0],q[6])
     circ.ccx(q[3],q[6],q[0])
-    circ.measure(q,c)
 
     print(circ.draw())
+    print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
 
+    #measure all so we can see results
+    circ.measure(q, c)
+
+    #print results
+    QI_authenticate()
+    qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circ, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circ)
