@@ -1,11 +1,11 @@
 import os
 from math import sqrt
 
-from qiskit import execute, BasicAer, QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit import execute, QuantumRegister, ClassicalRegister, QuantumCircuit
 from quantuminspire.qiskit import QI
 
-from src.cat_disentangler import get_cat_disentangler
-from src.cat_entangler import get_cat_entangler
+from src.distributed_operations.cat_disentangler import get_cat_disentangler
+from src.distributed_operations.cat_entangler import get_cat_entangler
 from src.setup import get_authentication
 
 QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')

@@ -1,19 +1,16 @@
-from math import sqrt
-
 import numpy as np
 import os
 from getpass import getpass
 
-from qiskit.visualization import circuit_drawer
 from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 
 from quantuminspire.qiskit import QI
 
-from src.cat_disentangler import get_cat_disentangler
-from src.cat_entangler import get_cat_entangler
+from src.distributed_operations.cat_disentangler import get_cat_disentangler
+from src.distributed_operations.cat_entangler import get_cat_entangler
 
 QI_EMAIL = os.getenv('QI_EMAIL')
 QI_PASSWORD = os.getenv('QI_PASSWORD')
