@@ -18,8 +18,8 @@ if __name__ == '__main__':
     q=QuantumRegister(N)
     circ=QuantumCircuit(q,c)
 
-    alpha = 0
-    beta = 1#sqrt(50) / sqrt(100)
+    alpha = 1
+    beta = 0#sqrt(50) / sqrt(100)
     circ.initialize([alpha, beta], q[0])
 
     #cnot section 1
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         circ.swap(q[0 + i], q[1 + i])
     circ.barrier()
 
-    #shor block section
+    shor block section
     random_bit = np.random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8])
     RNG = np.random.random(1)
     if RNG >= 0.66:
@@ -64,6 +64,7 @@ if __name__ == '__main__':
         circ.y(q[random_bit])
     circ.barrier()
 
+
     #cnot-small section 2
     for i in (0,3,6):
         circ.cnot(q[0+i],q[1+i])
@@ -73,14 +74,14 @@ if __name__ == '__main__':
     circ.barrier()
 
     #hadamard gate section 2
-    circ.h(q[0])
-    circ.h(q[3])
-    circ.h(q[6])
-    circ.barrier()
+    # circ.h(q[0])
+    # circ.h(q[3])
+    # circ.h(q[6])
+    # circ.barrier()
 
     #tof gate section 1
     for i in (0,3,6):
-        circ.h(q[0+i])
+        # circ.h(q[0+i])
         circ.cnot(q[1+i],q[0+i])
         circ.tdg(q[0+i])
         circ.swap(q[0+i],q[1+i])
@@ -99,14 +100,14 @@ if __name__ == '__main__':
         circ.tdg(q[1+i])
         circ.t(q[2+i])
         circ.cnot(q[2 + i], q[1 + i])
-        circ.h(q[0+i])
+        #circ.h(q[0+i])
 
     circ.barrier()
 
     #hadamard gate section 3
-    circ.h(q[0])
-    circ.h(q[3])
-    circ.h(q[6])
+    # circ.h(q[0])
+    # circ.h(q[3])
+    # circ.h(q[6])
     circ.barrier()
 
     # cnot section 1
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     circ.swap(q[4],q[5])
     circ.swap(q[3], q[4])
     circ.swap(q[3], q[2])
-    circ.cnot(q[4],q[3])
+    circ.cnot(q[3],q[2])
     circ.tdg(q[2])
     circ.swap(q[2],q[3])
     circ.swap(q[3],q[4])
@@ -165,7 +166,7 @@ if __name__ == '__main__':
     circ.swap(q[3], q[4])
 
     #measure
-    circ.measure_all()
+    circ.measure(q,c)
 
     print(circ.draw())
 
