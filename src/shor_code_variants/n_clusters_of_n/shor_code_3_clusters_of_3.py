@@ -1,40 +1,14 @@
 from math import sqrt
-
 import numpy as np
-import os
-from getpass import getpass
-
-from qiskit.visualization import circuit_drawer
-from quantuminspire.credentials import load_account, get_token_authentication, get_basic_authentication
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
 
 from quantuminspire.qiskit import QI
 
-from src.cat_disentangler import get_cat_disentangler
-from src.cat_entangler import get_cat_entangler
-
-QI_EMAIL = os.getenv('QI_EMAIL')
-QI_PASSWORD = os.getenv('QI_PASSWORD')
-QI_URL = os.getenv('API_URL', 'https://api.quantum-inspire.com/')
-
-
-def get_authentication():
-    """ Gets the authentication for connecting to the Quantum Inspire API."""
-    token = load_account()
-    if token is not None:
-        return get_token_authentication(token)
-    else:
-        if QI_EMAIL is None or QI_PASSWORD is None:
-            print('Enter email:')
-            email = input()
-            print('Enter password')
-            password = getpass()
-        else:
-            email, password = QI_EMAIL, QI_PASSWORD
-        return get_basic_authentication(email, password)
-
+from src.util.authentication import QI_authenticate
+from src.util.cat_disentangler import get_cat_disentangler
+from src.util.cat_entangler import get_cat_entangler
 
 # def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
 #     circuit_in.h(q_reg[q_in])
@@ -57,9 +31,6 @@ def get_authentication():
 
 
 if __name__ == '__main__':
-    authentication = get_authentication()
-    QI.set_authentication(authentication, QI_URL)
-    qi_backend = QI.get_backend('QX single-node simulator')
     c_a = [ClassicalRegister(1) for _ in range(4)]
     c_b = [ClassicalRegister(1) for _ in range(4)]
     c_c = [ClassicalRegister(1) for _ in range(4)]
@@ -79,7 +50,7 @@ if __name__ == '__main__':
     for reg in c_c:
         circuit_c.add_register(reg)
 
-    alpha =  0# / sqrt(2)
+    alpha =  0 #/ sqrt(2)
     beta = 1 #/ sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
 
@@ -202,19 +173,21 @@ if __name__ == '__main__':
     circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[3], q_c[3]], [c_b[0][0], c_b[3][0], c_c[3][0]])
     ## NON LOCAL TOFFOLI GATES --- END
 
-    # circuit.draw(output="mpl", filename="../circuit.jpeg")
-
     print(circuit.draw())
+    print("Circuit depth: ", circuit.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
 
     for i in range(3):
         for j in range(4):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[4*i + j])
 
+    QI_authenticate()
+    qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circuit, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
 
+    #Delete channel qubits from bit string to be printed
     for state, counts in histogram.items():
         results_all = list(list(state))
         results_all = results_all[::2]
