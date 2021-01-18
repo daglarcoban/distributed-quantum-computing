@@ -72,11 +72,11 @@ if __name__ == '__main__':
     q = QuantumRegister(9)
     circ = QuantumCircuit(q, c)
 
-    alpha = 1 / np.sqrt(2)
-    beta = 1 / np.sqrt(2)
+    alpha = np.sqrt(80)/np.sqrt(100)
+    beta = np.sqrt(20)/np.sqrt(100)
     circ.initialize([alpha, beta], q[0])
 
-    circ = circ.compose(get_shor_code_normal_circuit(), range(9))
+    circ = circ.compose(get_shor_code_normal_circuit('random', 'random'), range(9))
 
     print(circ.draw())
     print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
