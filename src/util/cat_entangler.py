@@ -6,7 +6,7 @@ from quantuminspire.qiskit import QI
 
 from src.util.authentication import QI_authenticate
 
-def get_cat_entangler(number_of_entangled_qubits):
+def get_cat_entangler_circuit(number_of_entangled_qubits):
     q = QuantumRegister(number_of_entangled_qubits + 1)
     circuit = QuantumCircuit(q)
     c = [ClassicalRegister(1) for _ in range(number_of_entangled_qubits + 1)]
@@ -46,11 +46,12 @@ if __name__ == '__main__':
     beta = sqrt(50)/sqrt(100)
     circuit.initialize([alpha, beta], q[0])
 
-    circuit = circuit.compose(get_cat_entangler(number_of_entangled_qubits), range(number_of_entangled_qubits + 1))
+    circuit = circuit.compose(get_cat_entangler_circuit(number_of_entangled_qubits), range(number_of_entangled_qubits + 1))
+
+    print(circuit.draw())
 
     for i in range(number_of_entangled_qubits + 1):
         circuit.measure(circuit.qregs[0][i], circuit.cregs[i])
-    print(circuit.draw())
 
     # The result is either 00000 or 11101
     # This is correct, since the order of the bits is reversed compared to what we are used to when we write it down

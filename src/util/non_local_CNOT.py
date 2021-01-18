@@ -3,8 +3,8 @@ from math import sqrt
 from qiskit import execute, QuantumRegister, ClassicalRegister, QuantumCircuit
 from quantuminspire.qiskit import QI
 
-from src.util.cat_disentangler import get_cat_disentangler
-from src.util.cat_entangler import get_cat_entangler
+from src.util.cat_disentangler import get_cat_disentangler_circuit
+from src.util.cat_entangler import get_cat_entangler_circuit
 from src.util.authentication import QI_authenticate
 
 #Test/example of how to implement a (ciruit with a) non-local CNOT
@@ -19,9 +19,9 @@ if __name__ == '__main__':
     beta = sqrt(50)/sqrt(100)
     circuit.initialize([alpha, beta], q[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [0, 1, 2])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [0, 1, 2])
     circuit.cx(q[2], q[3])
-    circuit = circuit.compose(get_cat_disentangler(2), [0, 1, 2])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [0, 1, 2])
 
     for i in range(4):
         circuit.measure(circuit.qregs[0][i], circuit.cregs[i])

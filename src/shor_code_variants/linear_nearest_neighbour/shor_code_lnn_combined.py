@@ -3,8 +3,8 @@ from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit import execute
 from quantuminspire.qiskit import QI
 from src.util.authentication import QI_authenticate
-from src.util.cat_disentangler import get_cat_disentangler
-from src.util.cat_entangler import get_cat_entangler
+from src.util.cat_disentangler import get_cat_disentangler_circuit
+from src.util.cat_entangler import get_cat_entangler_circuit
 
 if __name__ == '__main__':
     q=QuantumRegister(12)
@@ -18,14 +18,14 @@ if __name__ == '__main__':
     circ.initialize([alpha, beta], q[0])
     
     #CNOT from 1-4
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     circ.cx(q[5],q[4])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     
     #CNOT from 1-7
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     circ.cx(q[9],q[8])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     
     #hadamard gate section 1
     circ.h(q[0])
@@ -152,55 +152,55 @@ if __name__ == '__main__':
     
     
     #
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     circ.cx(q[5],q[4])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     
     #
-    circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     circ.cx(q[9],q[8])
-    circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     
     #Final Toffoli gate
     circ.h(q[0])
     
-    circ=circ.compose(get_cat_entangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
     circ.cx(q[1],q[0])
-    circ = circ.compose(get_cat_disentangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
     
     circ.tdg(q[0])
     
-    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
     circ.cx(q[1],q[0])
-    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
     
     circ.t(q[0])
     
-    circ=circ.compose(get_cat_entangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
     circ.cx(q[1],q[0])
-    circ = circ.compose(get_cat_disentangler(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[4], q[5], q[1]], [c[4][0], c[5][0], c[1][0]])
     
     circ.tdg(q[0])
     
-    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
     circ.cx(q[1],q[0])
-    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[8], q[9], q[1]], [c[8][0], c[9][0], c[1][0]])
     
     circ.t(q[0])
     circ.t(q[4])
     
     circ.h(q[0])
     
-    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
     circ.cx(q[5],q[4])
-    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
     
     circ.tdg(q[4])
     circ.t(q[8])
     
-    circ=circ.compose(get_cat_entangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ=circ.compose(get_cat_entangler_circuit(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
     circ.cx(q[5],q[4])
-    circ = circ.compose(get_cat_disentangler(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
+    circ = circ.compose(get_cat_disentangler_circuit(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
 
     print(circ.draw())
     print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
