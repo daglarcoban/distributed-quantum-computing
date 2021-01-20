@@ -4,7 +4,7 @@ from quantuminspire.qiskit import QI
 from src.shor_code_variants.shor_code_normal import get_shor_code_normal_circuit
 from src.util.authentication import QI_authenticate
 
-def test_shor_code_normal():
+def test_shor_code(function):
     for init_state in [0, 1]:
     # Superpositions hard to check in a automated way because of the non-determinism
     # But these can just be tested manually in the corresponding files,
@@ -19,7 +19,7 @@ def test_shor_code_normal():
                 beta = init_state
                 circ.initialize([alpha, beta], q[0])
 
-                circ = circ.compose(get_shor_code_normal_circuit(error, bit), range(9))
+                circ = circ.compose(function(error, bit), range(9))
 
                 #measure all so we can see results
                 circ.measure(q, c)
@@ -41,4 +41,4 @@ def test_shor_code_normal():
                 #Maybe convert to pytest file instead of printing? :P
 
 if __name__ == '__main__':
-    test_shor_code_normal()
+    test_shor_code(get_shor_code_normal_circuit)
