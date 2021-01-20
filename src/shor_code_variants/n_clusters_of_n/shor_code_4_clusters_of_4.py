@@ -35,10 +35,10 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     for reg in c_d:
         circuit_d.add_register(reg)
 
-    alpha = 0  # 1 / sqrt(2)
+    alpha = 1  # 1 / sqrt(2)
     if a is not None:
         alpha = a
-    beta = 1  # / sqrt(2)
+    beta = 0  # / sqrt(2)
     if b is not None:
         beta = b
     circuit_a.initialize([alpha, beta], q_a[0])
@@ -337,9 +337,9 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     return circuit
 
 if __name__ == '__main__':
-    a = 0 # 1 / sqrt(2)
-    b = 1 # / sqrt(2)
-    circuit = get_shor_code_4_c_4('random', 'random', 'random', a, b)
+    # a = 1 # 1 / sqrt(2)
+    # b = 0 # / sqrt(2)
+    circuit = get_shor_code_4_c_4('random', 'random', 'random')#, a, b)
 
     print(circuit.draw())
     print("Circuit depth: ",
@@ -355,7 +355,7 @@ if __name__ == '__main__':
 
     print("\nResult from the local Qiskit simulator backend:\n")
     backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circuit, backend=backend, shots=8)
+    job = execute(circuit, backend=backend, shots=4)
     result = job.result()
     print(result.get_counts(circuit))
 
