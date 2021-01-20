@@ -2,7 +2,7 @@ from math import sqrt
 import numpy as np
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit import execute
+from qiskit import execute, BasicAer
 
 from quantuminspire.qiskit import QI
 
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     for reg in c_d:
         circuit_d.add_register(reg)
 
-    alpha =  0 #/ sqrt(2)
-    beta = 1 #/ sqrt(2)
+    alpha = 1 / sqrt(2)
+    beta = 1 / sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c + circuit_d
@@ -54,14 +54,14 @@ if __name__ == '__main__':
     # cnot with cluster a and c
     circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[3]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and d
     circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
     circuit.cx(q_d[4], q_d[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[3]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
 
     circuit.barrier()
 
@@ -133,14 +133,14 @@ if __name__ == '__main__':
     # cnot with cluster a and c
     circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[3]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and d
     circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
     circuit.cx(q_d[4], q_d[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[3]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
 
     circuit.barrier()
 
@@ -313,31 +313,37 @@ if __name__ == '__main__':
     circuit.h(q_a[0])
     ## NON LOCAL CCCX GATES --- END
 
-    print(circuit.draw())
+    # print(circuit.draw())
     print("Circuit depth: ", circuit.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
 
     for i in range(4):
         for j in range(5):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[5*i + j])
 
-    QI_authenticate()
-    qi_backend = QI.get_backend('QX single-node simulator')
-    qi_job = execute(circuit, backend=qi_backend, shots=256)
-    qi_result = qi_job.result()
-    histogram = qi_result.get_counts(circuit)
-    print('State\tCounts')
+    # QI_authenticate()
+    # qi_backend = QI.get_backend('QX single-node simulator')
+    # qi_job = execute(circuit, backend=qi_backend, shots=1)
+    # qi_result = qi_job.result()
+    # histogram = qi_result.get_counts(circuit)
+    # print('State\tCounts')
 
-    #Delete channel qubits from bit string to be printed
-    for state, counts in histogram.items():
-        results_all = list(list(state))
-        results_all = results_all[::2]
-        results_all = "".join(results_all)
-        results = []
-        for i in range(len(results_all)):
-            if i % 5 == 0:
-                continue
-            else:
-                results.append(results_all[i])
-        results = "".join(results)
-        results = results + " " + str(counts)
-        print(results)
+    print("\nResult from the local Qiskit simulator backend:\n")
+    backend = BasicAer.get_backend("qasm_simulator")
+    job = execute(circuit, backend=backend, shots=8)
+    result = job.result()
+    print(result.get_counts(circuit))
+    #
+    # #Delete channel qubits from bit string to be printed
+    # for state, counts in histogram.items():
+    #     results_all = list(list(state))
+    #     results_all = results_all[::2]
+    #     results_all = "".join(results_all)
+    #     results = []
+    #     for i in range(len(results_all)):
+    #         if i % 5 == 0:
+    #             continue
+    #         else:
+    #             results.append(results_all[i])
+    #     results = "".join(results)
+    #     results = results + " " + str(counts)
+    #     print(results)
