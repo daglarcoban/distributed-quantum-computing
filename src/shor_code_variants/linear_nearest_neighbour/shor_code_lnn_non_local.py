@@ -12,12 +12,12 @@ if __name__ == '__main__':
     c = [ClassicalRegister(1) for _ in range(15)]
     for reg in c:
         circ.add_register(reg)
-    
+    #Initialize the main qubit that will be error corrected
     alpha = 1/np.sqrt(2)
     beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
     
-    #CNOT from 1-4
+    #First part of the phase flip code
     circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
     circ.cx(q[6],q[5])
     circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[6]], [c[0][0], c[1][0], c[6][0]])
@@ -26,11 +26,12 @@ if __name__ == '__main__':
     circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
     circ.cx(q[11],q[10])
     circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[11]], [c[0][0], c[1][0], c[11][0]])
-    
-    #Local section
+
     circ.h(q[0])
     circ.h(q[5])
     circ.h(q[10])
+
+    #First part of the bit flip code
     circ.cx(q[0],q[2])
     circ.cx(q[5],q[7])
     circ.cx(q[10],q[12])
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     circ.cx(q[14],q[13])
     circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[14]], [c[10][0], c[11][0], c[14][0]])
     
-    #
+    #Quantum error channel which generates a bit or phase flip error or both in one of the qubits
     random_bit = np.random.choice([0,2,3,5,7,8,10,12,13])
     RNG=np.random.random(1)
     if RNG>=0.66:
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     else:
         circ.y(q[random_bit])
     
-    #
+    #Second part of the bit flip code
     circ.cx(q[0],q[2])
     circ.cx(q[5],q[7])
     circ.cx(q[10],q[12])
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     circ.cx(q[14],q[13])
     circ = circ.compose(get_cat_disentangler(2), [q[10], q[11], q[14]], [c[10][0], c[11][0], c[14][0]])
     
-    
+
     circ.h(q[0])
     circ.h(q[5])
     circ.h(q[10])
@@ -150,7 +151,7 @@ if __name__ == '__main__':
     circ.cx(q[8],q[7])
     circ.cx(q[13],q[12])
     
-    #
+    #Second part of the phase flip code
     circ.h(q[0])
     circ.h(q[5])
     circ.h(q[10])

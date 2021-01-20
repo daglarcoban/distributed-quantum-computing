@@ -13,11 +13,12 @@ if __name__ == '__main__':
     for reg in c:
         circ.add_register(reg)
 
+    # Initialize the main qubit that will be error corrected
     alpha = 1/np.sqrt(2)
     beta = 1/np.sqrt(2)
     circ.initialize([alpha, beta], q[0])
     
-    #CNOT from 1-4
+    #First part of the phase flip code
     circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     circ.cx(q[5],q[4])
     circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
@@ -33,6 +34,7 @@ if __name__ == '__main__':
     circ.h(q[8])
     circ.barrier()
 
+    #First part of the bit flip code
     circ.cx(q[0],q[2])
     circ.cx(q[4],q[6])
     circ.cx(q[8],q[10])
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     circ.swap(q[4],q[6])
     circ.swap(q[8],q[10])
     
-    #shor block section
+    #Quantum error channel which generates a bit or phase flip error or both in one of the qubits
     random_bit = np.random.choice([0, 1, 2, 3, 4, 5, 6, 7, 8])
     RNG = np.random.random(1)
     if RNG >= 0.66:
@@ -59,7 +61,8 @@ if __name__ == '__main__':
     else:
         circ.y(q[random_bit])
     circ.barrier()
-    
+
+    #Second part of the bit flip code
     circ.cx(q[0],q[2])
     circ.cx(q[4],q[6])
     circ.cx(q[8],q[10])
@@ -151,7 +154,7 @@ if __name__ == '__main__':
     # circ.barrier()
     
     
-    #
+    #Second part of the phase flip code
     circ=circ.compose(get_cat_entangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
     circ.cx(q[5],q[4])
     circ = circ.compose(get_cat_disentangler(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])

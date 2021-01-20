@@ -36,6 +36,29 @@ if __name__ == '__main__':
     for reg in c_d:
         circuit_d.add_register(reg)
 
+
+    # def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
+    #     circuit_in.h(q_reg[q_in])
+    #     circuit_in.cx(q_reg[control_2], q_reg[q_in])
+    #     circuit_in.tdg(q_reg[q_in])
+    #     circuit_in.cx(q_reg[control_1], q_reg[q_in])
+    #     circuit_in.t(q_reg[q_in])
+    #     circuit_in.cx(q_reg[control_2], q_reg[q_in])
+    #     circuit_in.tdg(q_reg[q_in])
+    #     circuit_in.cx(q_reg[control_1], q_reg[q_in])
+    #     circuit_in.t(q_reg[control_2])
+    #     circuit_in.t(q_reg[q_in])
+    #     circuit_in.cx(q_reg[control_1], q_reg[control_2])
+    #     circuit_in.h(q_reg[q_in])
+    #     circuit_in.t(q_reg[control_1])
+    #     circuit_in.tdg(q_reg[control_2])
+    #     circuit_in.cx(q_reg[control_1], q_reg[control_2])
+    #
+    #     return circuit_in
+
+
+
+    # Initialize the main qubit that will be error corrected
     alpha = 1 / sqrt(2)
     beta = 1 / sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
@@ -44,6 +67,7 @@ if __name__ == '__main__':
 
     # Channel qubits are q_a[4], q_b[4], q_c[4], q_d[4]
 
+    #First part of the phase flip code
     # cnot with cluster a and b
     circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
@@ -107,10 +131,147 @@ if __name__ == '__main__':
     circuit.cx(q_c[0], q_c[2])
     circuit.cx(q_c[0], q_c[3])
 
+
+    #LOCAL CCCNOT GATES START
     circuit.mct([q_a[1], q_a[2], q_a[3]], q_a[0], None, mode="advanced")
     circuit.mct([q_b[1], q_b[2], q_b[3]], q_b[0], None, mode="advanced")
     circuit.mct([q_c[1], q_c[2], q_c[3]], q_c[0], None, mode="advanced")
     circuit.mct([q_d[1], q_d[2], q_d[3]], q_d[0], None, mode="advanced")
+
+    #Splitting up the local CCCNOT gates to calculate circuit depth adequately
+    # CCCNOT WITHIN CLUSTER A
+    # toffoli(circuit, 3, 2, 1, q_a)
+    # circuit.h(q_a[0])
+    # circuit.tdg(q_a[1])
+    # circuit.tdg(q_a[0])
+    # circuit.cx(q_a[1], q_a[0])
+    # circuit.t(q_a[0])
+    # circuit.cx(q_a[1], q_a[0])
+    # toffoli(circuit, 3, 2, 1, q_a)
+    # circuit.t(q_a[1])
+    # circuit.t(q_a[0])
+    # circuit.cx(q_a[1], q_a[0])
+    # circuit.tdg(q_a[0])
+    # circuit.cx(q_a[1], q_a[0])
+    # circuit.cx(q_a[3], q_a[2])
+    # circuit.rz(-1 / 8 * np.pi, q_a[2])
+    # circuit.rz(-1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[2], q_a[0])
+    # circuit.rz(1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[2], q_a[0])
+    # circuit.cx(q_a[3], q_a[2])
+    # circuit.rz(1 / 8 * np.pi, q_a[2])
+    # circuit.rz(1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[2], q_a[0])
+    # circuit.rz(-1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[2], q_a[0])
+    # circuit.rz(1 / 8 * np.pi, q_a[3])
+    # circuit.rz(1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[3], q_a[0])
+    # circuit.rz(-1 / 8 * np.pi, q_a[0])
+    # circuit.cx(q_a[3], q_a[0])
+    # circuit.h(q_a[0])
+    #
+    # # CCCNOT WITHIN CLUSTER B
+    # toffoli(circuit, 3, 2, 1, q_b)
+    # circuit.h(q_b[0])
+    # circuit.tdg(q_b[1])
+    # circuit.tdg(q_b[0])
+    # circuit.cx(q_b[1], q_b[0])
+    # circuit.t(q_b[0])
+    # circuit.cx(q_b[1], q_b[0])
+    # toffoli(circuit, 3, 2, 1, q_b)
+    # circuit.t(q_b[1])
+    # circuit.t(q_b[0])
+    # circuit.cx(q_b[1], q_b[0])
+    # circuit.tdg(q_b[0])
+    # circuit.cx(q_b[1], q_b[0])
+    # circuit.cx(q_b[3], q_b[2])
+    # circuit.rz(-1 / 8 * np.pi, q_b[2])
+    # circuit.rz(-1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[2], q_b[0])
+    # circuit.rz(1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[2], q_b[0])
+    # circuit.cx(q_b[3], q_b[2])
+    # circuit.rz(1 / 8 * np.pi, q_b[2])
+    # circuit.rz(1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[2], q_b[0])
+    # circuit.rz(-1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[2], q_b[0])
+    # circuit.rz(1 / 8 * np.pi, q_b[3])
+    # circuit.rz(1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[3], q_b[0])
+    # circuit.rz(-1 / 8 * np.pi, q_b[0])
+    # circuit.cx(q_b[3], q_b[0])
+    # circuit.h(q_b[0])
+    #
+    # # CCCNOT WITHIN CLUSTER C
+    # toffoli(circuit, 3, 2, 1, q_c)
+    # circuit.h(q_c[0])
+    # circuit.tdg(q_c[1])
+    # circuit.tdg(q_c[0])
+    # circuit.cx(q_c[1], q_c[0])
+    # circuit.t(q_c[0])
+    # circuit.cx(q_c[1], q_c[0])
+    # toffoli(circuit, 3, 2, 1, q_c)
+    # circuit.t(q_c[1])
+    # circuit.t(q_c[0])
+    # circuit.cx(q_c[1], q_c[0])
+    # circuit.tdg(q_c[0])
+    # circuit.cx(q_c[1], q_c[0])
+    # circuit.cx(q_c[3], q_c[2])
+    # circuit.rz(-1 / 8 * np.pi, q_c[2])
+    # circuit.rz(-1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[2], q_c[0])
+    # circuit.rz(1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[2], q_c[0])
+    # circuit.cx(q_c[3], q_c[2])
+    # circuit.rz(1 / 8 * np.pi, q_c[2])
+    # circuit.rz(1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[2], q_c[0])
+    # circuit.rz(-1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[2], q_c[0])
+    # circuit.rz(1 / 8 * np.pi, q_c[3])
+    # circuit.rz(1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[3], q_c[0])
+    # circuit.rz(-1 / 8 * np.pi, q_c[0])
+    # circuit.cx(q_c[3], q_c[0])
+    # circuit.h(q_c[0])
+    #
+    # # CCCNOT WITHIN CLUSTER D
+    # toffoli(circuit, 3, 2, 1, q_d)
+    # circuit.h(q_d[0])
+    # circuit.tdg(q_d[1])
+    # circuit.tdg(q_d[0])
+    # circuit.cx(q_d[1], q_d[0])
+    # circuit.t(q_d[0])
+    # circuit.cx(q_d[1], q_d[0])
+    # toffoli(circuit, 3, 2, 1, q_d)
+    # circuit.t(q_d[1])
+    # circuit.t(q_d[0])
+    # circuit.cx(q_d[1], q_d[0])
+    # circuit.tdg(q_d[0])
+    # circuit.cx(q_d[1], q_d[0])
+    # circuit.cx(q_d[3], q_d[2])
+    # circuit.rz(-1 / 8 * np.pi, q_d[2])
+    # circuit.rz(-1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_d[2], q_d[0])
+    # circuit.rz(1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_d[2], q_d[0])
+    # circuit.cx(q_d[3], q_d[2])
+    # circuit.rz(1 / 8 * np.pi, q_d[2])
+    # circuit.rz(1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_d[2], q_d[0])
+    # circuit.rz(-1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_c[2], q_d[0])
+    # circuit.rz(1 / 8 * np.pi, q_d[3])
+    # circuit.rz(1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_d[3], q_d[0])
+    # circuit.rz(-1 / 8 * np.pi, q_d[0])
+    # circuit.cx(q_d[3], q_d[0])
+    # circuit.h(q_d[0])
+
+    #LOCAL CCCNOT GATES END
 
     circuit.barrier()  # until h gates
 
@@ -320,18 +481,19 @@ if __name__ == '__main__':
         for j in range(5):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[5*i + j])
 
-    # QI_authenticate()
-    # qi_backend = QI.get_backend('QX single-node simulator')
-    # qi_job = execute(circuit, backend=qi_backend, shots=1)
-    # qi_result = qi_job.result()
-    # histogram = qi_result.get_counts(circuit)
-    # print('State\tCounts')
+    QI_authenticate()
+    qi_backend = QI.get_backend('QX single-node simulator')
+    qi_job = execute(circuit, backend=qi_backend, shots=1)
+    qi_result = qi_job.result()
+    histogram = qi_result.get_counts(circuit)
+    print('State\tCounts')
 
     print("\nResult from the local Qiskit simulator backend:\n")
     backend = BasicAer.get_backend("qasm_simulator")
     job = execute(circuit, backend=backend, shots=8)
     result = job.result()
     print(result.get_counts(circuit))
+
     #
     # #Delete channel qubits from bit string to be printed
     # for state, counts in histogram.items():
