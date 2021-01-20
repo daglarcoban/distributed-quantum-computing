@@ -1,5 +1,6 @@
 from math import sqrt
 import numpy as np
+import time
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit import execute, BasicAer
@@ -12,6 +13,8 @@ from src.util.cat_entangler import get_cat_entangler
 
 
 if __name__ == '__main__':
+    start_time = time.time()
+
     c_a = [ClassicalRegister(1) for _ in range(5)]
     c_b = [ClassicalRegister(1) for _ in range(5)]
     c_c = [ClassicalRegister(1) for _ in range(5)]
@@ -36,8 +39,8 @@ if __name__ == '__main__':
     for reg in c_d:
         circuit_d.add_register(reg)
 
-    alpha = 1 / sqrt(2)
-    beta = 1 / sqrt(2)
+    alpha = 0 # / sqrt(2)
+    beta = 1 #/ sqrt(2)
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c + circuit_d
@@ -329,9 +332,12 @@ if __name__ == '__main__':
 
     print("\nResult from the local Qiskit simulator backend:\n")
     backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circuit, backend=backend, shots=8)
+    job = execute(circuit, backend=backend, shots=64)
     result = job.result()
     print(result.get_counts(circuit))
+
+    print("--- %s minutes ---" % ((time.time() - start_time) / 60))
+
     #
     # #Delete channel qubits from bit string to be printed
     # for state, counts in histogram.items():
