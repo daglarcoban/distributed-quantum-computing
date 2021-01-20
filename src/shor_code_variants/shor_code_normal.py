@@ -11,10 +11,18 @@ from src.util.authentication import QI_authenticate
 #if you provide 'random' for error_type and/or error_bit, a random error type/bit will be chosen
 #otherwise, for error_type you can provide: 'x' (bit flip), 'z' (phase flip) or 'y' (both)
 #         , for error_bit, any index from [0, 1 ... 8] can be chosen to introduce the error on
-def get_shor_code_normal_circuit(error_type = None, error_bit = None):
+def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, b = None):
     c = ClassicalRegister(9)
     q = QuantumRegister(9)
     circ = QuantumCircuit(q, c)
+
+    alpha = 0  # 1 / sqrt(2)
+    if a is not None:
+        alpha = a
+    beta = 1  # / sqrt(2)
+    if b is not None:
+        beta = b
+    circ.initialize([alpha, beta], q[0])
 
     circ.cx(q[0], q[3])
     circ.cx(q[0], q[6])
@@ -65,24 +73,19 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None):
     circ.cx(q[0], q[6])
     circ.ccx(q[3], q[6], q[0])
 
+    #measure all so we can see results
+    circ.measure(q, c)
+
     return circ
 
 if __name__ == '__main__':
-    c = ClassicalRegister(9)
-    q = QuantumRegister(9)
-    circ = QuantumCircuit(q, c)
+    a = np.sqrt(80)/np.sqrt(100)
+    b = np.sqrt(20)/np.sqrt(100)
 
-    alpha = np.sqrt(80)/np.sqrt(100)
-    beta = np.sqrt(20)/np.sqrt(100)
-    circ.initialize([alpha, beta], q[0])
-
-    circ = circ.compose(get_shor_code_normal_circuit('random', 'random'), range(9))
+    circ = get_shor_code_normal_circuit('random', 'random', a, b)
 
     print(circ.draw())
     print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
-
-    #measure all so we can see results
-    circ.measure(q, c)
 
     #print results
     QI_authenticate()
