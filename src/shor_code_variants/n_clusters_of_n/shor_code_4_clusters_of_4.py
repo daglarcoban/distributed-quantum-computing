@@ -8,13 +8,10 @@ from qiskit import execute, BasicAer
 from quantuminspire.qiskit import QI
 
 from src.util.authentication import QI_authenticate
-from src.util.cat_disentangler import get_cat_disentangler
-from src.util.cat_entangler import get_cat_entangler
+from src.util.cat_disentangler import get_cat_disentangler_circuit
+from src.util.cat_entangler import get_cat_entangler_circuit
 
-
-if __name__ == '__main__':
-    start_time = time.time()
-
+def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a = None, b = None):
     c_a = [ClassicalRegister(1) for _ in range(5)]
     c_b = [ClassicalRegister(1) for _ in range(5)]
     c_c = [ClassicalRegister(1) for _ in range(5)]
@@ -24,7 +21,6 @@ if __name__ == '__main__':
     q_c = QuantumRegister(5)
     q_d = QuantumRegister(5)
     q = [q_a, q_b, q_c, q_d]
-    c = [c_a, c_b, c_c, c_d]
 
     circuit_a = QuantumCircuit(q_a)
     for reg in c_a:
@@ -39,8 +35,12 @@ if __name__ == '__main__':
     for reg in c_d:
         circuit_d.add_register(reg)
 
-    alpha = 0 # / sqrt(2)
-    beta = 1 #/ sqrt(2)
+    alpha = 0  # 1 / sqrt(2)
+    if a is not None:
+        alpha = a
+    beta = 1  # / sqrt(2)
+    if b is not None:
+        beta = b
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c + circuit_d
@@ -48,23 +48,23 @@ if __name__ == '__main__':
     # Channel qubits are q_a[4], q_b[4], q_c[4], q_d[4]
 
     # cnot with cluster a and b
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and c
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and d
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
     circuit.cx(q_d[4], q_d[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
 
     circuit.barrier()
 
@@ -86,16 +86,27 @@ if __name__ == '__main__':
     circuit.barrier()  # until ERROR BLOCK
 
     ### ERROR BLOCK --- START
-    random_bit = np.random.choice([0, 1, 2, 3])
-    random_cluster = np.random.choice([0, 1, 2, 3])
-    error = np.random.random(1)
+    if error_type == 'random':
+        RNG = np.random.random(1)
+        if RNG >= 0.66:
+            error_type = 'z'
+        elif RNG >= 0.33 and RNG < 0.66:
+            error_type = 'x'
+        else:
+            error_type = 'y'
+    if error_bit == 'random':
+        error_bit = np.random.choice([0, 1, 2, 3])
+    if error_cluster == 'random':
+        error_cluster = np.random.choice([0, 1, 2, 3])
 
-    if error >= 0.66:
-        circuit.z(q[random_cluster][random_bit])
-    elif error >= 0.33 and error < 0.66:
-        circuit.x(q[random_cluster][random_bit])
-    else:
-        circuit.y(q[random_cluster][random_bit])
+    if error_bit != None:
+        if error_type == 'z':
+            circuit.z(q[error_cluster][error_bit])
+        elif error_type == 'x':
+            circuit.x(q[error_cluster][error_bit])
+        elif error_type == 'y':
+            circuit.y(q[error_cluster][error_bit])
+
     ## ERROR BLOCK --- END
 
     circuit.barrier()  # after ERROR BLOCK
@@ -127,23 +138,23 @@ if __name__ == '__main__':
     #NON LOCAL CNOT STUFF
 
     # cnot with cluster a and b
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_b[4]], [c_a[0][0], c_a[4][0], c_b[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and c
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_c[4]], [c_a[0][0], c_a[4][0], c_c[4][0]])
 
     circuit.barrier()
 
     # cnot with cluster a and d
-    circuit = circuit.compose(get_cat_entangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
     circuit.cx(q_d[4], q_d[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[4], q_d[4]], [c_a[0][0], c_a[4][0], c_d[4][0]])
 
     circuit.barrier()
 
@@ -153,42 +164,42 @@ if __name__ == '__main__':
     ##FIRST NORMAL TOFFOLI
     circuit.h(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
 
     circuit.tdg(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
 
     circuit.t(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
 
     circuit.tdg(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
 
     circuit.t(q_b[0])
     circuit.t(q_c[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
 
     circuit.h(q_b[0])
     circuit.t(q_d[0])
     circuit.tdg(q_c[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
 
 
     # FIRST NON LOCAL TOFFOLI END!!!
@@ -197,121 +208,121 @@ if __name__ == '__main__':
     circuit.tdg(q_b[0])
     circuit.tdg(q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
 
     circuit.t(q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
 
     circuit.h(q_a[0])
 
     ## SECOND NON LOCAL TOFFOLI
     circuit.h(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
 
     circuit.tdg(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
 
     circuit.t(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_b[4]], [c_c[0][0], c_c[4][0], c_b[4][0]])
 
     circuit.tdg(q_b[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
     circuit.cx(q_b[4], q_b[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_b[4]], [c_d[0][0], c_d[4][0], c_b[4][0]])
 
     circuit.t(q_b[0])
     circuit.t(q_c[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
 
     circuit.h(q_b[0])
     circuit.t(q_d[0])
     circuit.tdg(q_c[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     ## SECOND NON LCOAL TOFFOLI END
     circuit.h(q_a[0])
     circuit.tdg(q_b[0])
     circuit.tdg(q_a[0])
-    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.t(q_a[0])
-    circuit = circuit.compose(get_cat_entangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.h(q_a[0])
 
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.h(q_a[0])
 
     circuit.rz(-1/8 * np.pi, q_c[0])
     circuit.rz(-1/8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
 
     circuit.rz(1 / 8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
 
     circuit.h(q_a[0])
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.h(q_a[0])
 
     circuit.rz(1/8 * np.pi, q_c[0])
     circuit.rz(1/8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
 
     circuit.rz(-1 / 8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
     circuit.h(q_a[0])
     circuit.h(q_a[0])
     circuit.rz(1/8 * np.pi, q_d[0])
     circuit.rz(1/8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
 
     circuit.rz(-1 / 8 * np.pi, q_a[0])
 
-    circuit = circuit.compose(get_cat_entangler(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
-    circuit = circuit.compose(get_cat_disentangler(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
+    circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_a[4]], [c_d[0][0], c_d[4][0], c_a[4][0]])
 
     circuit.h(q_a[0])
     ## NON LOCAL CCCX GATES --- END
@@ -323,6 +334,18 @@ if __name__ == '__main__':
         for j in range(5):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[5*i + j])
 
+    return circuit
+
+if __name__ == '__main__':
+    a = 0 # 1 / sqrt(2)
+    b = 1 # / sqrt(2)
+    circuit = get_shor_code_4_c_4('random', 'random', 'random', a, b)
+
+    print(circuit.draw())
+    print("Circuit depth: ",
+          circuit.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
+
+
     # QI_authenticate()
     # qi_backend = QI.get_backend('QX single-node simulator')
     # qi_job = execute(circuit, backend=qi_backend, shots=1)
@@ -332,11 +355,9 @@ if __name__ == '__main__':
 
     print("\nResult from the local Qiskit simulator backend:\n")
     backend = BasicAer.get_backend("qasm_simulator")
-    job = execute(circuit, backend=backend, shots=64)
+    job = execute(circuit, backend=backend, shots=8)
     result = job.result()
     print(result.get_counts(circuit))
-
-    print("--- %s minutes ---" % ((time.time() - start_time) / 60))
 
     #
     # #Delete channel qubits from bit string to be printed
