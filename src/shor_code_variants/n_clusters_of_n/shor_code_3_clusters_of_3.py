@@ -208,7 +208,7 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
         for j in range(4):
             circuit.measure(circuit.qregs[i][j], circuit.cregs[4 * i + j])
 
-    print("Circuit depth: ", circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
+    print("Circuit depth: ", circuit.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
 
     return circuit
 
