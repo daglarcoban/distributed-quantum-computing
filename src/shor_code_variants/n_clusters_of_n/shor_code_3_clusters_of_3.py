@@ -49,18 +49,21 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     for reg in c_c:
         circuit_c.add_register(reg)
 
+    # Initialize the main qubit that will be error corrected
     alpha = 0  # 1 / sqrt(2)
     if a is not None:
         alpha = a
     beta = 1  # / sqrt(2)
     if b is not None:
         beta = b
+
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c
 
     # Channel qubits are q_a[3], q_b[3], q_c[3]
 
+    # First part of the phase flip code
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[3], q_b[3]], [c_a[0][0], c_a[3][0], c_b[3][0]])
     circuit.cx(q_b[3], q_b[0])
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_a[0], q_a[3], q_b[3]],
@@ -79,6 +82,7 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     circuit.h(q_b[0])
     circuit.h(q_c[0])
 
+    # First part of the bit flip code
     circuit.cx(q_a[0], q_a[1])
     circuit.cx(q_a[0], q_a[2])
     circuit.cx(q_b[0], q_b[1])
@@ -114,12 +118,14 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
 
     circuit.barrier()  # after ERROR BLOCK
 
+    #Second part of the bit flip code
     circuit.cx(q_a[0], q_a[1])
     circuit.cx(q_a[0], q_a[2])
     circuit.cx(q_b[0], q_b[1])
     circuit.cx(q_b[0], q_b[2])
     circuit.cx(q_c[0], q_c[1])
     circuit.cx(q_c[0], q_c[2])
+
 
     # circuit + toffoli(circuit, 1, 2, 0, q_a)
     # circuit + toffoli(circuit, 1, 2, 0, q_b)
@@ -128,13 +134,14 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     circuit.ccx(q_b[1], q_b[2], q_b[0])
     circuit.ccx(q_c[1], q_c[2], q_c[0])
 
-    circuit.barrier()  # until h gates
+    circuit.barrier()  # until H gates
 
+    #Second part of the phase flip code
     circuit.h(q_a[0])
     circuit.h(q_b[0])
     circuit.h(q_c[0])
 
-    circuit.barrier()  # until non local stuff
+    circuit.barrier()  # until non local gates
 
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[3], q_b[3]], [c_a[0][0], c_a[3][0], c_b[3][0]])
     circuit.cx(q_b[3], q_b[0])
@@ -150,7 +157,7 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
 
     circuit.barrier()  # until non local toffoli
 
-    ### NON LOCAL TOFFOLI GATES --- START
+    ### NON LOCAL TOFFOLI GATE --- START
     circuit.h(q_a[0])
 
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_c[0], q_c[3], q_a[3]], [c_c[0][0], c_c[3][0], c_a[3][0]])
@@ -195,7 +202,7 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     circuit.cx(q_c[3], q_c[0])
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[3], q_c[3]],
                               [c_b[0][0], c_b[3][0], c_c[3][0]])
-    ## NON LOCAL TOFFOLI GATES --- END
+    ## NON LOCAL TOFFOLI GATE --- END
 
     for i in range(3):
         for j in range(4):

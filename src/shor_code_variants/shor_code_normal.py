@@ -16,6 +16,7 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
     q = QuantumRegister(9)
     circ = QuantumCircuit(q, c)
 
+    #Initialize the main qubit that will be error corrected
     alpha = 0  # 1 / sqrt(2)
     if a is not None:
         alpha = a
@@ -24,8 +25,11 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
         beta = b
     circ.initialize([alpha, beta], q[0])
 
+    #First part of the phase flip code
     circ.cx(q[0], q[3])
     circ.cx(q[0], q[6])
+
+    #First part of the bit flip code
     circ.h(q[0])
     circ.h(q[3])
     circ.h(q[6])
@@ -37,6 +41,8 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
     circ.cx(q[6], q[8])
 
     circ.barrier()
+
+    # Quantum error channel which generates a bit or phase flip error or both in one of the qubits
     if error_type == 'random':
         RNG = np.random.random(1)
         if RNG >= 0.66:
@@ -57,6 +63,7 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
             circ.y(q[error_bit])
     circ.barrier()
 
+    #Second part of the bit flip code
     circ.cx(q[0], q[1])
     circ.cx(q[3], q[4])
     circ.cx(q[6], q[7])
@@ -66,6 +73,8 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
     circ.ccx(q[1], q[2], q[0])
     circ.ccx(q[4], q[5], q[3])
     circ.ccx(q[7], q[8], q[6])
+
+    #Second part of the phase flip code
     circ.h(q[0])
     circ.h(q[3])
     circ.h(q[6])
@@ -73,7 +82,10 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
     circ.cx(q[0], q[6])
     circ.ccx(q[3], q[6], q[0])
 
-    #measure all so we can see results
+    # print(circ.draw())
+    print("Circuit depth: ", circ.depth())
+
+    #Measure all so we can see results
     circ.measure(q, c)
 
     return circ
