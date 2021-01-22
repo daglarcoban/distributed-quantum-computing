@@ -37,12 +37,13 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
 
 
     # Initialize the main qubit that will be error corrected
-    alpha = 1  # 1 / sqrt(2)
-    if a is not None:
-        alpha = a
-    beta = 0  # / sqrt(2)
-    if b is not None:
-        beta = b
+    alpha = 0  # 1 / sqrt(2)
+    beta = 1
+    # if a is not None:
+    #     alpha = a
+    # beta = 0  # / sqrt(2)
+    # if b is not None:
+    #     beta = b
 
     circuit_a.initialize([alpha, beta], q_a[0])
 
@@ -89,7 +90,8 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
 
     circuit.barrier()  # until ERROR BLOCK
 
-    ### ERROR BLOCK --- START
+
+    # ### ERROR BLOCK --- START
     if error_type == 'random':
         RNG = np.random.random(1)
         if RNG >= 0.66:
@@ -114,7 +116,7 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     ## ERROR BLOCK --- END
 
     circuit.barrier()  # after ERROR BLOCK
-
+    #
     circuit.cx(q_a[0], q_a[1])
     circuit.cx(q_a[0], q_a[2])
     circuit.cx(q_a[0], q_a[3])
@@ -402,12 +404,12 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     ## SECOND NON LCOAL TOFFOLI END
     circuit.h(q_a[0])
-    circuit.tdg(q_b[0])
-    circuit.tdg(q_a[0])
+    circuit.t(q_b[0])
+    circuit.t(q_a[0])
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
-    circuit.t(q_a[0])
+    circuit.tdg(q_a[0])  # HERE I WAS LEFT CHECKING
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
     circuit.cx(q_a[4], q_a[0])
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_b[0], q_b[4], q_a[4]], [c_b[0][0], c_b[4][0], c_a[4][0]])
@@ -433,6 +435,7 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_c[0], q_c[4], q_a[4]], [c_c[0][0], c_c[4][0], c_a[4][0]])
 
     circuit.h(q_a[0])
+
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
     circuit.cx(q_c[4], q_c[0])
     circuit = circuit.compose(get_cat_disentangler_circuit(2), [q_d[0], q_d[4], q_c[4]], [c_d[0][0], c_d[4][0], c_c[4][0]])
@@ -490,7 +493,7 @@ if __name__ == '__main__':
 
     QI_authenticate()
     qi_backend = QI.get_backend('QX single-node simulator')
-    qi_job = execute(circuit, backend=qi_backend, shots=256)
+    qi_job = execute(circuit, backend=qi_backend, shots=8)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circuit)
     print('State\tCounts')
