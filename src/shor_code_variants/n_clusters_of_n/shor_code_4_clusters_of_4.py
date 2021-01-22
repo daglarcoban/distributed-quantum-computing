@@ -38,12 +38,11 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
 
     # Initialize the main qubit that will be error corrected
     alpha = 0  # 1 / sqrt(2)
-    beta = 1
-    # if a is not None:
-    #     alpha = a
-    # beta = 0  # / sqrt(2)
-    # if b is not None:
-    #     beta = b
+    if a is not None:
+        alpha = a
+    beta = 1  # / sqrt(2)
+    if b is not None:
+        beta = b
 
     circuit_a.initialize([alpha, beta], q_a[0])
 
@@ -91,7 +90,7 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     circuit.barrier()  # until ERROR BLOCK
 
 
-    # ### ERROR BLOCK --- START
+    ### ERROR BLOCK --- START
     if error_type == 'random':
         RNG = np.random.random(1)
         if RNG >= 0.66:
