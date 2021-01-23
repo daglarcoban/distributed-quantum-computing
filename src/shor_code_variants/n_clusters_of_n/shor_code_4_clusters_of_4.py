@@ -481,8 +481,8 @@ def get_shor_code_4_c_4(error_cluster=None, error_type=None, error_bit=None, a =
     return circuit
 
 if __name__ == '__main__':
-    a = 1 / sqrt(2)
-    b = 1 / sqrt(2)
+    a = 0 #1 / sqrt(2)
+    b = 1 #/ sqrt(2)
     circuit = get_shor_code_4_c_4('random', 'random', 'random', a, b)
 
     print(circuit.draw())
