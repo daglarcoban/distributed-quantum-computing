@@ -7,6 +7,10 @@ from quantuminspire.qiskit import QI
 
 from src.util.authentication import QI_authenticate
 
+def ccx(q1,):
+    return
+
+
 if __name__ == '__main__':
     c = ClassicalRegister(4)
     q = QuantumRegister(4)
