@@ -6,7 +6,7 @@ from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit import execute
 
 from quantuminspire.qiskit import QI
-
+from src.cccx import cccx
 from src.util.authentication import QI_authenticate
 
 def get_shor_code_extended(error_type = None, error_bit = None, a = None, b = None):
@@ -83,11 +83,15 @@ def get_shor_code_extended(error_type = None, error_bit = None, a = None, b = No
     circ.cx(q[12], q[13])
     circ.cx(q[12], q[14])
     circ.cx(q[12], q[15])
-
-    circ.mct([q[1], q[2], q[3]], q[0])
-    circ.mct([q[5], q[6], q[7]], q[4], )
-    circ.mct([q[9], q[10], q[11]], q[8])
-    circ.mct([q[13], q[14], q[15]], q[12])
+    circ.mct
+    # circ.mct([q[1], q[2], q[3]], q[0])
+    # circ.mct([q[5], q[6], q[7]], q[4], )
+    # circ.mct([q[9], q[10], q[11]], q[8])
+    # circ.mct([q[13], q[14], q[15]], q[12])
+    cccx(circ, q[1], q[2], q[3], q[0])
+    cccx(circ, q[5], q[6], q[7], q[4])
+    cccx(circ, q[9], q[10], q[11], q[8])
+    cccx(circ, q[13], q[14], q[15], q[12])
 
     circ.h(q[0])
     circ.h(q[4])
@@ -97,8 +101,9 @@ def get_shor_code_extended(error_type = None, error_bit = None, a = None, b = No
     circ.cx(q[0], q[4])
     circ.cx(q[0], q[8])
     circ.cx(q[0], q[12])
-    circ.mct([q[12], q[8], q[4]], q[0], None, mode='advanced')
 
+    #circ.mct([q[12], q[8], q[4]], q[0], None, mode='advanced')
+    cccx(circ,q[12], q[8], q[4], q[0])
     # print(circ.draw())
     print("Circuit depth: ",
           circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
