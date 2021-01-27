@@ -157,33 +157,33 @@ class Test(unittest.TestCase):
                         print("-------------------------")
                         self.assertEqual(result_first_bit, str(init_state))
 
-    # def test_4_cluster(self):
-    #     print("Testing 4 clusters of 4 shor code")
-    #     print("-------------------------")
-    #     warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
-    #     for init_state in [0, 1]:
-    #         for bit in range(4):
-    #             for error in ['x', 'y', 'z', None]:
-    #                 for cluster in [0, 1, 2, 3]:
-    #
-    #                     print("init state: {}, bit: {}, error: {}, cluster: {}".format(init_state, bit, error, cluster))
-    #
-    #                     alpha = (1 + init_state) % 2
-    #                     beta = init_state
-    #
-    #                     circ = get_shor_code_4_c_4(cluster, error, bit, alpha, beta)
-    #
-    #                     QI_authenticate()
-    #                     qi_backend = QI.get_backend('QX single-node simulator')
-    #                     qi_job = execute(circ, backend=qi_backend, shots=self.SHOTS)
-    #                     qi_result = qi_job.result()
-    #                     histogram = qi_result.get_counts(circ)
-    #                     result_state = list(histogram.items())[0][0]
+    def test_4_cluster(self):
+        print("Testing 4 clusters of 4 shor code")
+        print("-------------------------")
+        warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
+        for init_state in [0, 1]:
+            for bit in range(4):
+                for error in ['x', 'y', 'z', None]:
+                    for cluster in [0, 1, 2, 3]:
 
-    #                     result_first_bit = result_state[-1]
-    #                     print(result_first_bit == str(init_state))
-    #                     print("-------------------------")
-    #                     self.assertEqual(result_first_bit, str(init_state))
+                        print("init state: {}, bit: {}, error: {}, cluster: {}".format(init_state, bit, error, cluster))
+
+                        alpha = (1 + init_state) % 2
+                        beta = init_state
+
+                        circ = get_shor_code_4_c_4(cluster, error, bit, alpha, beta)
+
+                        QI_authenticate()
+                        qi_backend = QI.get_backend('QX single-node simulator')
+                        qi_job = execute(circ, backend=qi_backend, shots=self.SHOTS)
+                        qi_result = qi_job.result()
+                        histogram = qi_result.get_counts(circ)
+                        result_state = list(histogram.items())[0][0]
+
+                        result_first_bit = result_state[-1]
+                        print(result_first_bit == str(init_state))
+                        print("-------------------------")
+                        self.assertEqual(result_first_bit, str(init_state))
 
 
 if __name__ == '__main__':

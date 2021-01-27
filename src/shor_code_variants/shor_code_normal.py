@@ -91,8 +91,8 @@ def get_shor_code_normal_circuit(error_type = None, error_bit = None, a = None, 
     return circ
 
 if __name__ == '__main__':
-    a = np.sqrt(80)/np.sqrt(100)
-    b = np.sqrt(20)/np.sqrt(100)
+    a = 0 #1 / sqrt(2)
+    b = 1 #/ sqrt(2)
 
     circ = get_shor_code_normal_circuit('random', 'random', a, b)
 
