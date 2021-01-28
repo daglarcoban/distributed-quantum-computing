@@ -22,6 +22,8 @@ import unittest
 # We want to know if this is corrected properly/has remained the same
 # Also check correct working without error (None)
 
+# When running everything at once the backend might time out, so better run the test cases one by one
+
 class Test(unittest.TestCase):
     SHOTS = 8
 
