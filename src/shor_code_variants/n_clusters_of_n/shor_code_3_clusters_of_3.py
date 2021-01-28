@@ -1,4 +1,3 @@
-from math import sqrt
 import numpy as np
 
 from qiskit.circuit import QuantumRegister, ClassicalRegister, QuantumCircuit
@@ -9,7 +8,6 @@ from quantuminspire.qiskit import QI
 from src.util.authentication import QI_authenticate
 from src.util.cat_disentangler import get_cat_disentangler_circuit
 from src.util.cat_entangler import get_cat_entangler_circuit
-
 
 # def toffoli(circuit_in=QuantumCircuit, control_1=int, control_2=int, q_in=int, q_reg=QuantumRegister):
 #     circuit_in.h(q_reg[q_in])
@@ -31,6 +29,7 @@ from src.util.cat_entangler import get_cat_entangler_circuit
 #     return circuit_in
 
 def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a = None, b = None):
+    # Last (qu)bit in each register is the channel one per cluster
     c_a = [ClassicalRegister(1) for _ in range(4)]
     c_b = [ClassicalRegister(1) for _ in range(4)]
     c_c = [ClassicalRegister(1) for _ in range(4)]
@@ -60,8 +59,6 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     circuit_a.initialize([alpha, beta], q_a[0])
 
     circuit = circuit_a + circuit_b + circuit_c
-
-    # Channel qubits are q_a[3], q_b[3], q_c[3]
 
     # First part of the phase flip code
     circuit = circuit.compose(get_cat_entangler_circuit(2), [q_a[0], q_a[3], q_b[3]], [c_a[0][0], c_a[3][0], c_b[3][0]])
@@ -125,7 +122,6 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
     circuit.cx(q_b[0], q_b[2])
     circuit.cx(q_c[0], q_c[1])
     circuit.cx(q_c[0], q_c[2])
-
 
     # circuit + toffoli(circuit, 1, 2, 0, q_a)
     # circuit + toffoli(circuit, 1, 2, 0, q_b)
@@ -204,14 +200,7 @@ def get_shor_code_3_c_3(error_cluster=None, error_type=None, error_bit=None, a =
                               [c_b[0][0], c_b[3][0], c_c[3][0]])
     ## NON LOCAL TOFFOLI GATE --- END
 
-    for i in range(3):
-        for j in range(4):
-            circuit.measure(circuit.qregs[i][j], circuit.cregs[4 * i + j])
-
-    print("Circuit depth: ", circuit.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
-
     return circuit
-
 
 if __name__ == '__main__':
     a = 0 # 1 / sqrt(2)
@@ -222,24 +211,29 @@ if __name__ == '__main__':
     print("Circuit depth: ",
           circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
 
+    for i in range(3):
+        for j in range(4):
+            circ.measure(circ.qregs[i][j], circ.cregs[4 * i + j])
+
     QI_authenticate()
     qi_backend = QI.get_backend('QX single-node simulator')
     qi_job = execute(circ, backend=qi_backend, shots=256)
     qi_result = qi_job.result()
     histogram = qi_result.get_counts(circ)
     print('State\tCounts')
+    [print('{0}\t{1}'.format(state, counts)) for state, counts in histogram.items()]
 
-    # Delete channel qubits from bit string to be printed
-    for state, counts in histogram.items():
-        results_all = list(list(state))
-        results_all = results_all[::2]
-        results_all = "".join(results_all)
-        results = []
-        for i in range(len(results_all)):
-            if i % 4 == 0:
-                continue
-            else:
-                results.append(results_all[i])
-        results = "".join(results)
-        results = results + " " + str(counts)
-        print(results)
+    # # Delete channel qubits from bit string to be printed
+    # for state, counts in histogram.items():
+    #     results_all = list(list(state))
+    #     results_all = results_all[::2]
+    #     results_all = "".join(results_all)
+    #     results = []
+    #     for i in range(len(results_all)):
+    #         if i % 4 == 0:
+    #             continue
+    #         else:
+    #             results.append(results_all[i])
+    #     results = "".join(results)
+    #     results = results + " " + str(counts)
+    #     print(results)

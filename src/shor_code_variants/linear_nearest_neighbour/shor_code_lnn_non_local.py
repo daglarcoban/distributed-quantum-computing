@@ -222,13 +222,6 @@ def get_shor_code_lnn_non_local(error_type = None, error_bit = None, a = None, b
     circ.cx(q[6], q[5])
     circ = circ.compose(get_cat_disentangler_circuit(2), [q[10], q[11], q[6]], [c[10][0], c[11][0], c[6][0]])
 
-    print("Circuit depth: ",
-          circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
-
-    # measure all so we can see results
-    for i in range(15):
-        circ.measure(circ.qregs[0][i], circ.cregs[i])
-
     return circ
 
 if __name__ == '__main__':
@@ -237,11 +230,11 @@ if __name__ == '__main__':
 
     circ = get_shor_code_lnn_non_local('random', 'random', a, b)
     print(circ.draw())
-    # print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
+    print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
 
-    # # measure all so we can see results
-    # for i in range(15):
-    #     circ.measure(circ.qregs[0][i], circ.cregs[i])
+    # measure all so we can see results
+    for i in range(15):
+        circ.measure(circ.qregs[0][i], circ.cregs[i])
 
     #print results
     QI_authenticate()

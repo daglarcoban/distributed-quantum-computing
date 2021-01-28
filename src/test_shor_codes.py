@@ -13,15 +13,14 @@ from src.util.authentication import QI_authenticate
 
 import unittest
 
-
-# Superpositions hard to check in a automated way because of the non-determinism
+# Superpositions can't be checked in a automated way because of the non-determinism
 # But these can just be tested manually in the corresponding files,
-# as well as introducing a random error on a random bit
-
-# Also check correct working without error (None)
+# as well as introducing a random error on a random bit.
+# For these tests, all possibilities for errors are exhaustively tried
 
 # For the assertion, we only care about the first bit (or last when printed in qiskit)
 # We want to know if this is corrected properly/has remained the same
+# Also check correct working without error (None)
 
 class Test(unittest.TestCase):
     SHOTS = 8
@@ -38,6 +37,7 @@ class Test(unittest.TestCase):
                     print("init state: {}, bit: {}, error: {}".format(init_state, bit, error))
 
                     circ = get_shor_code_normal_circuit(error, bit, alpha, beta)
+                    circ.measure(circ.qregs[0], circ.cregs[0])
 
                     QI_authenticate()
                     qi_backend = QI.get_backend('QX single-node simulator')
@@ -64,6 +64,8 @@ class Test(unittest.TestCase):
                     print("init state: {}, bit: {}, error: {}".format(init_state, bit, error))
 
                     circ = get_shor_code_lnn_combined(error, bit, alpha, beta)
+                    for i in range(12):
+                        circ.measure(circ.qregs[0][i], circ.cregs[i])
 
                     QI_authenticate()
                     qi_backend = QI.get_backend('QX single-node simulator')
@@ -90,6 +92,8 @@ class Test(unittest.TestCase):
                     print("init state: {}, bit: {}, error: {}".format(init_state, bit, error))
 
                     circ = get_shor_code_lnn_non_local(error, bit, alpha, beta)
+                    for i in range(15):
+                        circ.measure(circ.qregs[0][i], circ.cregs[i])
 
                     QI_authenticate()
                     qi_backend = QI.get_backend('QX single-node simulator')
@@ -116,6 +120,7 @@ class Test(unittest.TestCase):
                     print("init state: {}, bit: {}, error: {}".format(init_state, bit, error))
 
                     circ = get_shor_code_lnn_swaps(error, bit, alpha, beta)
+                    circ.measure(circ.qregs[0], circ.cregs[0])
 
                     QI_authenticate()
                     qi_backend = QI.get_backend('QX single-node simulator')
@@ -144,6 +149,9 @@ class Test(unittest.TestCase):
                         beta = init_state
 
                         circ = get_shor_code_3_c_3(cluster, error, bit, alpha, beta)
+                        for i in range(3):
+                            for j in range(4):
+                                circ.measure(circ.qregs[i][j], circ.cregs[4 * i + j])
 
                         QI_authenticate()
                         qi_backend = QI.get_backend('QX single-node simulator')
@@ -172,6 +180,9 @@ class Test(unittest.TestCase):
                         beta = init_state
 
                         circ = get_shor_code_4_c_4(cluster, error, bit, alpha, beta)
+                        for i in range(4):
+                            for j in range(5):
+                                circ.measure(circ.qregs[i][j], circ.cregs[5 * i + j])
 
                         QI_authenticate()
                         qi_backend = QI.get_backend('QX single-node simulator')
@@ -184,7 +195,6 @@ class Test(unittest.TestCase):
                         print(result_first_bit == str(init_state))
                         print("-------------------------")
                         self.assertEqual(result_first_bit, str(init_state))
-
 
 if __name__ == '__main__':
     unittest.main()

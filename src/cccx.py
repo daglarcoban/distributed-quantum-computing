@@ -49,51 +49,11 @@ def cccx(circuit, control_qubit_1, control_qubit_2, control_qubit_3, target_qubi
     circuit.h(target_qubit)
     pass
 
-
 if __name__ == '__main__':
     c = ClassicalRegister(4)
     q = QuantumRegister(4)
     circuit = QuantumCircuit(q, c)
 
-    # circuit.ccx(q[0], q[1], q[2])
-    # circuit.h(q[3])
-    # circuit.tdg(q[2])
-    # circuit.tdg(q[3])
-    # circuit.cx(q[2], q[3])
-    # circuit.t(q[3])
-    # circuit.cx(q[2], q[3])
-    # circuit.h(q[3])
-    # circuit.ccx(q[0], q[1], q[2])
-    # circuit.h(q[3])
-    # circuit.t(q[2])
-    # circuit.t(q[3])
-    # circuit.cx(q[2], q[3])
-    # circuit.tdg(q[3])
-    # circuit.cx(q[2], q[3])
-    # circuit.h(q[3])
-    # circuit.cx(q[0], q[1])
-    # circuit.h(q[3])
-    # circuit.rz(-1/8 * np.pi, q[1])
-    # circuit.rz(-1/8 * np.pi, q[3])
-    # circuit.cx(q[1], q[3])
-    # circuit.rz(1 / 8 * np.pi, q[3])
-    # circuit.cx(q[1], q[3])
-    # circuit.h(q[3])
-    # circuit.cx(q[0], q[1])
-    # circuit.h(q[3])
-    # circuit.rz(1/8 * np.pi, q[1])
-    # circuit.rz(1/8 * np.pi, q[3])
-    # circuit.cx(q[1], q[3])
-    # circuit.rz(-1 / 8 * np.pi, q[3])
-    # circuit.cx(q[1], q[3])
-    # circuit.h(q[3])
-    # circuit.h(q[3])
-    # circuit.rz(1/8 * np.pi, q[0])
-    # circuit.rz(1/8 * np.pi, q[3])
-    # circuit.cx(q[0], q[3])
-    # circuit.rz(-1 / 8 * np.pi, q[3])
-    # circuit.cx(q[0], q[3])
-    # circuit.h(q[3])
     cccx(circuit,q[0],q[1],q[2],q[3])
 
     print(circuit.draw())
@@ -105,7 +65,6 @@ if __name__ == '__main__':
 
     # measure all so we can see results
     circuit.measure(q, c)
-
 
     # print results
     QI_authenticate()

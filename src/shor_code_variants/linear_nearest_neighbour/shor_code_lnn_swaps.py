@@ -158,12 +158,6 @@ def get_shor_code_lnn_swaps(error_type = None, error_bit = None, a = None, b = N
     circ.swap(q[4], q[5])
     circ.swap(q[3], q[4])
 
-    print("Circuit depth: ",
-          circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
-
-    # measure all so we can see results
-    circ.measure(q, c)
-
     return circ
 
 if __name__ == '__main__':
@@ -173,6 +167,11 @@ if __name__ == '__main__':
     circ = get_shor_code_lnn_swaps('random', 'random', a, b)
 
     print(circ.draw())
+    print("Circuit depth: ",
+          circ.depth())  # measure at the end + error block (which might introduce extra gate) should be commented out
+
+    # measure all so we can see results
+    circ.measure(circ.qregs[0], circ.cregs[0])
 
     #print results
     QI_authenticate()

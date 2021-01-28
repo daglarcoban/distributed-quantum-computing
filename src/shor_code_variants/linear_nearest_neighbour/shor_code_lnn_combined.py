@@ -13,7 +13,7 @@ def get_shor_code_lnn_combined(error_type = None, error_bit = None, a = None, b 
     for reg in c:
         circ.add_register(reg)
 
-    #Initialize the main qubit that will be error corrected
+    #Initialize the main qubit
     alpha = 0  # 1 / sqrt(2)
     if a is not None:
         alpha = a
@@ -173,7 +173,6 @@ def get_shor_code_lnn_combined(error_type = None, error_bit = None, a = None, b 
     circ.cx(q[5], q[4])
     circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[5]], [c[0][0], c[1][0], c[5][0]])
 
-    #
     circ = circ.compose(get_cat_entangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
     circ.cx(q[9], q[8])
     circ = circ.compose(get_cat_disentangler_circuit(2), [q[0], q[1], q[9]], [c[0][0], c[1][0], c[9][0]])
@@ -219,12 +218,6 @@ def get_shor_code_lnn_combined(error_type = None, error_bit = None, a = None, b 
     circ.cx(q[5], q[4])
     circ = circ.compose(get_cat_disentangler_circuit(2), [q[8], q[9], q[5]], [c[8][0], c[9][0], c[5][0]])
 
-    print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
-
-    #measure all so we can see results
-    for i in range(12):
-        circ.measure(circ.qregs[0][i], circ.cregs[i])
-
     return circ
 
 if __name__ == '__main__':
@@ -233,11 +226,11 @@ if __name__ == '__main__':
 
     circ = get_shor_code_lnn_combined('random', 'random', a, b)
     print(circ.draw())
-    # print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
+    print("Circuit depth: ", circ.depth()) #measure at the end + error block (which might introduce extra gate) should be commented out
 
-    # #measure all so we can see results
-    # for i in range(12):
-    #     circ.measure(circ.qregs[0][i], circ.cregs[i])
+    #measure all so we can see results
+    for i in range(12):
+        circ.measure(circ.qregs[0][i], circ.cregs[i])
 
     # print results
     QI_authenticate()
